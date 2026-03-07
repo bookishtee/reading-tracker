@@ -89,9 +89,9 @@ textarea { resize:vertical; min-height:70px; }
 .btn:disabled { opacity:0.5; cursor:not-allowed; }
 .btn.secondary { background:transparent; border:1px solid #a07850; color:#a07850; }
 .btn.secondary:hover { background:#a07850; color:#fffdf8; }
-.search-row { display:flex; gap:10px; margin-bottom:8px; }
-.search-row input { flex:1; font-size:1rem; padding:12px 16px; }
-.search-go { background:#a07850; color:#fffdf8; border:none; border-radius:2px; padding:12px 20px; font-family:'Lora',serif; font-size:0.85rem; cursor:pointer; white-space:nowrap; transition:background 0.2s; }
+.search-row { display:flex; gap:8px; margin-bottom:8px; width:100%; }
+.search-row input { flex:1; min-width:0; font-size:1rem; padding:12px 14px; width:100%; }
+.search-go { background:#a07850; color:#fffdf8; border:none; border-radius:2px; padding:12px 16px; font-family:'Lora',serif; font-size:0.82rem; cursor:pointer; white-space:nowrap; transition:background 0.2s; flex-shrink:0; }
 .search-go:hover { background:#3b2f2f; }
 .search-go:disabled { opacity:0.5; cursor:not-allowed; }
 .results-list { background:#fffdf8; border:1px solid #d4b896; border-radius:2px; box-shadow:4px 4px 0 #e0cebc; max-height:400px; overflow-y:auto; margin-top:4px; }
@@ -157,7 +157,7 @@ textarea { resize:vertical; min-height:70px; }
 .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#3b2f2f; color:#e8d5b7; padding:10px 24px; border-radius:2px; font-family:'Lora',serif; font-size:0.85rem; z-index:200; opacity:0; transition:opacity 0.3s; pointer-events:none; white-space:nowrap; }
 .toast.show { opacity:1; }
 .loading { text-align:center; padding:60px; color:#a07850; font-style:italic; font-family:'Lora',serif; }
-@media(max-width:560px) { .form-grid{grid-template-columns:1fr} .stats-grid{grid-template-columns:repeat(2,1fr)} .nav-btn{padding:14px 16px;font-size:0.75rem} }
+@media(max-width:560px) { .form-grid{grid-template-columns:1fr} .stats-grid{grid-template-columns:repeat(2,1fr)} .nav-btn{padding:14px 16px;font-size:0.75rem} .card{padding:20px 16px} .container{padding:24px 14px} .search-row{flex-wrap:nowrap} }
 `;
 
 const FORMATS = ["📖 Physical","📱 Digital","🎧 Audiobook"];
