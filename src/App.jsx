@@ -37,33 +37,40 @@ async function sbDeleteWhere(table, col, val) {
   await fetch(`${SUPABASE_URL}/rest/v1/${table}?${col}=eq.${val}`, { method:"DELETE", headers });
 }
 
-async function searchOpenLibrary(query) {
-  const res = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=10&fields=key,title,author_name,first_publish_year,number_of_pages_median,cover_i,subject`);
-  const data = await res.json();
-  return (data.docs||[]).map(doc => ({
-    title: doc.title||'',
-    author: doc.author_name ? doc.author_name[0] : '',
-    year: doc.first_publish_year||'',
-    pages: doc.number_of_pages_median||'',
-    cover_url: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg` : null,
-    genre: doc.subject ? doc.subject[0] : '',
-    ol_key: doc.key||'',
-  }));
+async function searchGoogleBooks(query) {
+  try {
+    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=12&printType=books`);
+    const data = await res.json();
+    if (!data.items) return [];
+    return data.items.map(item => {
+      const info = item.volumeInfo || {};
+      const cover = info.imageLinks
+        ? (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail || null)
+        : null;
+      const cover_url = cover
+        ? cover.replace('http://', 'https://').replace('zoom=1', 'zoom=2')
+        : null;
+      return {
+        title: info.title || '',
+        author: info.authors ? info.authors[0] : '',
+        year: info.publishedDate ? info.publishedDate.slice(0,4) : '',
+        pages: info.pageCount || '',
+        cover_url,
+        genre: info.categories ? info.categories[0] : '',
+        synopsis: info.description ? info.description.slice(0,600) + (info.description.length > 600 ? '…' : '') : '',
+        gb_id: item.id || '',
+      };
+    });
+  } catch { return []; }
 }
 
-async function fetchBookDetails(olKey) {
-  // olKey looks like /works/OL123W
+async function fetchBookDetails(gbId) {
+  if (!gbId) return '';
   try {
-    const res = await fetch(`https://openlibrary.org${olKey}.json`);
+    const res = await fetch(`https://www.googleapis.com/books/v1/volumes/${gbId}`);
     const data = await res.json();
-    let synopsis = '';
-    if (data.description) {
-      synopsis = typeof data.description === 'string' ? data.description : data.description.value || '';
-    }
-    if (!synopsis && data.excerpts && data.excerpts[0]) {
-      synopsis = data.excerpts[0].excerpt || '';
-    }
-    return synopsis.slice(0, 600) + (synopsis.length > 600 ? '…' : '');
+    const desc = data.volumeInfo?.description || '';
+    return desc.slice(0, 600) + (desc.length > 600 ? '…' : '');
   } catch { return ''; }
 }
 
@@ -533,7 +540,7 @@ const today = new Date();
 const todayStr = today.toISOString().slice(0,10);
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const CURRENT_YEAR = today.getFullYear();
-const emptyForm = { title:'',author:'',genre:'',format:'',status:'Want to Read',start_date:'',end_date:'',total_pages:'',rating:0,notes:'',cover_url:'',ol_key:'' };
+const emptyForm = { title:'',author:'',genre:'',format:'',status:'Want to Read',start_date:'',end_date:'',total_pages:'',rating:0,notes:'',cover_url:'',gb_id:'' };
 
 // Icon — daughter's illustration hosted in the repo's public folder
 const ICON_URL = "/icon.png";
@@ -557,7 +564,7 @@ function BookSearch({ onSelect }) {
   async function go() {
     if (!q.trim()) return;
     setBusy(true);
-    try { setResults(await searchOpenLibrary(q)); }
+    try { setResults(await searchGoogleBooks(q)); }
     catch { setResults([]); }
     setBusy(false);
   }
@@ -601,8 +608,8 @@ function BookDetailSheet({ book, onClose, onEdit }) {
   useEffect(()=>{
     if (!book) return;
     setSynopsis(null);
-    if (book.ol_key) {
-      fetchBookDetails(book.ol_key).then(s => setSynopsis(s));
+    if (book.gb_id) {
+      fetchBookDetails(book.gb_id).then(s => setSynopsis(s));
     } else {
       setSynopsis('');
     }
@@ -804,7 +811,7 @@ export default function App() {
       title:r.title||'', author:r.author||'',
       total_pages:r.pages?String(r.pages):'',
       cover_url:r.cover_url||'', genre:r.genre||'',
-      ol_key:r.ol_key||''
+      gb_id:r.gb_id||''
     }));
     setMode('form');
   }
@@ -837,7 +844,7 @@ export default function App() {
   }
 
   function editBook(b) {
-    setForm({...b, total_pages:b.total_pages||'', start_date:b.start_date||'', end_date:b.end_date||'', cover_url:b.cover_url||'', ol_key:b.ol_key||''});
+    setForm({...b, total_pages:b.total_pages||'', start_date:b.start_date||'', end_date:b.end_date||'', cover_url:b.cover_url||'', gb_id:b.gb_id||''});
     setEditId(b.id); setMode('form'); setTab('shelf');
   }
 
