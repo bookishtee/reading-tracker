@@ -61,7 +61,7 @@ async function searchGoogleBooks(query) {
         pages: info.pageCount || '',
         cover_url,
         genre: info.categories ? info.categories[0] : '',
-        synopsis: cleanDesc.slice(0,600) + (cleanDesc.length > 600 ? '…' : ''),
+        synopsis: cleanDesc,
         gb_id: item.id || '',
       };
     });
@@ -75,7 +75,7 @@ async function fetchBookDetails(gbId) {
     const data = await res.json();
     const desc = data.volumeInfo?.description || '';
     const clean = desc.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-    return clean.slice(0, 600) + (clean.length > 600 ? '…' : '');
+    return clean;
   } catch { return ''; }
 }
 
