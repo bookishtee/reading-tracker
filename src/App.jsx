@@ -37,9 +37,11 @@ async function sbDeleteWhere(table, col, val) {
   await fetch(`${SUPABASE_URL}/rest/v1/${table}?${col}=eq.${val}`, { method:"DELETE", headers });
 }
 
+const GOOGLE_BOOKS_KEY = "AIzaSyBXSbmfceyS5byvHaxP4HES9_7EbOjEark";
+
 async function searchGoogleBooks(query) {
   try {
-    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=12&printType=books`);
+    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=12&printType=books&key=${GOOGLE_BOOKS_KEY}`);
     const data = await res.json();
     if (!data.items) return [];
     return data.items.map(item => {
@@ -69,10 +71,9 @@ async function searchGoogleBooks(query) {
 async function fetchBookDetails(gbId) {
   if (!gbId) return '';
   try {
-    const res = await fetch(`https://www.googleapis.com/books/v1/volumes/${gbId}`);
+    const res = await fetch(`https://www.googleapis.com/books/v1/volumes/${gbId}?key=${GOOGLE_BOOKS_KEY}`);
     const data = await res.json();
     const desc = data.volumeInfo?.description || '';
-    // Strip HTML tags
     const clean = desc.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
     return clean.slice(0, 600) + (clean.length > 600 ? '…' : '');
   } catch { return ''; }
