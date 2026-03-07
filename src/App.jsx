@@ -172,12 +172,19 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 }
 .goal-fill.complete { background: linear-gradient(90deg, #4CAF50, #81C784); }
 .goal-edit-btn {
-  position: absolute; top: 10px; right: 12px;
-  background: none; border: none; color: var(--mid);
-  font-size: 0.72rem; font-weight: 700; cursor: pointer;
-  font-family: 'Nunito', sans-serif; padding: 2px 6px; border-radius: 6px;
+  background: var(--sage-pale);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  color: var(--mid);
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  padding: 3px 9px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
-.goal-edit-btn:hover { background: var(--sage-pale); color: var(--ink); }
+.goal-edit-btn:hover { background: var(--sage-light); color: var(--ink); }
 .goal-set-prompt {
   text-align: center; padding: 4px 0;
 }
@@ -720,11 +727,13 @@ function GoalBanner({ books, goalYear, onSetGoal }) {
 
   return (
     <div className="goal-banner">
-      <button className="goal-edit-btn" onClick={()=>{ setInputVal(goalYear); setEditing(true); }}>Edit</button>
       <div className="goal-banner-row">
         <div className="goal-banner-label">{CURRENT_YEAR} Reading Goal</div>
-        <div className="goal-banner-count">
-          <span>{finishedThisYear}</span> / {goalYear} books
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <div className="goal-banner-count">
+            <span>{finishedThisYear}</span> / {goalYear} books
+          </div>
+          <button className="goal-edit-btn" onClick={()=>{ setInputVal(goalYear); setEditing(true); }}>Edit</button>
         </div>
       </div>
       <div className="goal-track">
