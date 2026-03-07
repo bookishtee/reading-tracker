@@ -825,7 +825,8 @@ export default function App() {
         format:form.format||null, status:form.status,
         start_date:form.start_date||null, end_date:form.end_date||null,
         total_pages:form.total_pages?parseInt(form.total_pages):null,
-        rating:form.rating||0, notes:form.notes||null, cover_url:form.cover_url||null
+        rating:form.rating||0, notes:form.notes||null, cover_url:form.cover_url||null,
+        gb_id:form.gb_id||null
       };
       if(editId){await sbUpdate('books',editId,p);showToast('Book updated ✓');}
       else{await sbInsert('books',p);showToast('Added to your shelf ✓');}
