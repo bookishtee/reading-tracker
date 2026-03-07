@@ -47,117 +47,476 @@ async function searchOpenLibrary(query) {
     pages: doc.number_of_pages_median||'',
     cover_url: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg` : null,
     genre: doc.subject ? doc.subject[0] : '',
+    ol_key: doc.key||'',
   }));
 }
 
-const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');`;
+async function fetchBookDetails(olKey) {
+  // olKey looks like /works/OL123W
+  try {
+    const res = await fetch(`https://openlibrary.org${olKey}.json`);
+    const data = await res.json();
+    let synopsis = '';
+    if (data.description) {
+      synopsis = typeof data.description === 'string' ? data.description : data.description.value || '';
+    }
+    if (!synopsis && data.excerpts && data.excerpts[0]) {
+      synopsis = data.excerpts[0].excerpt || '';
+    }
+    return synopsis.slice(0, 600) + (synopsis.length > 600 ? '…' : '');
+  } catch { return ''; }
+}
+
+const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Fraunces:ital,wght@0,600;0,700;1,600;1,700&display=swap');`;
 
 const STYLES = `
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Lora', serif; background: #f5efe6; color: #3b2f2f; }
-.app { min-height: 100vh; background: #f5efe6; background-image: radial-gradient(ellipse at 20% 10%, #e8d5b7 0%, transparent 50%), radial-gradient(ellipse at 80% 90%, #d4b896 0%, transparent 50%); padding: 0 0 60px 0; }
-.header { background: #3b2f2f; padding: 28px 32px 24px; text-align: center; position: relative; overflow: hidden; }
-.header::before { content:''; position:absolute; inset:0; background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,0.02) 10px,rgba(255,255,255,0.02) 20px); }
-.header-title { font-family:'Playfair Display',serif; font-size:2rem; font-style:italic; color:#e8d5b7; letter-spacing:0.02em; }
-.header-sub { font-family:'Lora',serif; font-size:0.8rem; color:#a07850; letter-spacing:0.15em; text-transform:uppercase; margin-top:4px; }
-.sync-dot { position:absolute; top:14px; right:16px; font-size:0.7rem; color:#a07850; font-family:'Lora',serif; }
-.nav { display:flex; justify-content:center; background:#2a2020; border-bottom:2px solid #a07850; }
-.nav-btn { background:none; border:none; color:#a07850; font-family:'Lora',serif; font-size:0.85rem; letter-spacing:0.12em; text-transform:uppercase; padding:14px 28px; cursor:pointer; transition:all 0.2s; position:relative; }
-.nav-btn.active { color:#e8d5b7; background:rgba(160,120,80,0.15); }
-.nav-btn.active::after { content:''; position:absolute; bottom:-2px; left:0; right:0; height:2px; background:#e8d5b7; }
-.nav-btn:hover:not(.active) { color:#c9a87a; }
-.container { max-width:780px; margin:0 auto; padding:32px 20px; }
-.card { background:#fffdf8; border:1px solid #e0cebc; border-radius:2px; padding:28px; margin-bottom:20px; box-shadow:3px 3px 0 #e0cebc,0 1px 12px rgba(59,47,47,0.06); position:relative; }
-.card::before { content:''; position:absolute; top:0; left:0; width:4px; height:100%; background:linear-gradient(to bottom,#a07850,#c9a87a); border-radius:2px 0 0 2px; }
-.section-title { font-family:'Playfair Display',serif; font-size:1.4rem; font-style:italic; color:#3b2f2f; margin-bottom:24px; padding-bottom:12px; border-bottom:1px dashed #c9a87a; }
-.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-.form-group { display:flex; flex-direction:column; gap:6px; }
-.form-group.full { grid-column:1/-1; }
-label { font-size:0.72rem; letter-spacing:0.12em; text-transform:uppercase; color:#8a6a50; font-family:'Lora',serif; }
-input,select,textarea { background:#fdf8f0; border:1px solid #d4b896; border-radius:2px; padding:10px 12px; font-family:'Lora',serif; font-size:0.9rem; color:#3b2f2f; outline:none; transition:border-color 0.2s; }
-input:focus,select:focus,textarea:focus { border-color:#a07850; background:#fffdf8; }
-textarea { resize:vertical; min-height:70px; }
-.format-select { display:flex; gap:10px; flex-wrap:wrap; }
-.format-btn { flex:1; background:#fdf8f0; border:1px solid #d4b896; border-radius:2px; padding:10px 8px; font-family:'Lora',serif; font-size:0.82rem; color:#8a6a50; cursor:pointer; transition:all 0.2s; text-align:center; min-width:80px; }
-.format-btn.selected { background:#3b2f2f; border-color:#3b2f2f; color:#e8d5b7; }
-.format-btn:hover:not(.selected) { border-color:#a07850; color:#a07850; }
-.stars { display:flex; gap:4px; align-items:center; }
-.star { font-size:1.4rem; cursor:pointer; color:#d4b896; transition:color 0.15s; line-height:1; }
-.star.lit { color:#a07850; }
-.btn { background:#3b2f2f; color:#e8d5b7; border:none; border-radius:2px; padding:12px 28px; font-family:'Lora',serif; font-size:0.85rem; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; transition:all 0.2s; margin-top:8px; }
-.btn:hover { background:#a07850; color:#fffdf8; }
-.btn:disabled { opacity:0.5; cursor:not-allowed; }
-.btn.secondary { background:transparent; border:1px solid #a07850; color:#a07850; }
-.btn.secondary:hover { background:#a07850; color:#fffdf8; }
-.search-row { display:flex; gap:8px; margin-bottom:8px; width:100%; }
-.search-row input { flex:1; min-width:0; font-size:1rem; padding:12px 14px; width:100%; }
-.search-go { background:#a07850; color:#fffdf8; border:none; border-radius:2px; padding:12px 16px; font-family:'Lora',serif; font-size:0.82rem; cursor:pointer; white-space:nowrap; transition:background 0.2s; flex-shrink:0; }
-.search-go:hover { background:#3b2f2f; }
-.search-go:disabled { opacity:0.5; cursor:not-allowed; }
-.results-list { background:#fffdf8; border:1px solid #d4b896; border-radius:2px; box-shadow:4px 4px 0 #e0cebc; max-height:400px; overflow-y:auto; margin-top:4px; }
-.result-row { display:flex; gap:14px; padding:14px 16px; border-bottom:1px solid #f0e6d6; cursor:pointer; transition:background 0.15s; align-items:flex-start; }
-.result-row:last-child { border-bottom:none; }
-.result-row:hover { background:#fdf0e0; }
-.result-thumb { width:42px; height:62px; object-fit:cover; border-radius:1px; flex-shrink:0; }
-.result-thumb-ph { width:42px; height:62px; background:#e0cebc; border-radius:1px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:1.3rem; }
-.result-title { font-family:'Playfair Display',serif; font-size:0.95rem; font-weight:600; color:#3b2f2f; line-height:1.3; }
-.result-author { font-style:italic; color:#8a6a50; font-size:0.82rem; margin-top:2px; }
-.result-meta { font-size:0.72rem; color:#a07850; margin-top:3px; }
-.manual-tip { text-align:center; padding:11px; border-top:1px dashed #e0cebc; font-size:0.82rem; color:#a07850; cursor:pointer; font-family:'Lora',serif; }
-.manual-tip:hover { color:#3b2f2f; }
-.manual-tip span { text-decoration:underline; }
-.no-results { padding:22px; text-align:center; color:#a07850; font-style:italic; font-size:0.88rem; }
-.skip-link { font-size:0.82rem; color:#a07850; cursor:pointer; font-family:'Lora',serif; margin-top:10px; display:block; text-align:right; }
-.skip-link:hover { color:#3b2f2f; }
-.skip-link span { text-decoration:underline; }
-.book-item { background:#fffdf8; border:1px solid #e0cebc; border-radius:2px; padding:16px 20px; margin-bottom:14px; box-shadow:2px 2px 0 #e0cebc; display:flex; gap:16px; align-items:flex-start; }
-.book-cover { width:52px; height:76px; object-fit:cover; border-radius:1px; flex-shrink:0; box-shadow:2px 2px 5px rgba(59,47,47,0.18); }
-.book-cover-ph { width:52px; height:76px; flex-shrink:0; border-radius:1px; background:linear-gradient(135deg,#a07850,#c9a87a); display:flex; align-items:center; justify-content:center; font-size:1.6rem; box-shadow:2px 2px 5px rgba(59,47,47,0.18); }
-.book-info { flex:1; min-width:0; }
-.book-title { font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:600; color:#3b2f2f; line-height:1.3; }
-.book-author { font-style:italic; color:#8a6a50; font-size:0.85rem; margin-top:2px; }
-.book-meta { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; align-items:center; }
-.tag { background:#f0e6d6; border:1px solid #d4b896; border-radius:20px; padding:2px 10px; font-size:0.72rem; color:#8a6a50; letter-spacing:0.05em; text-transform:uppercase; }
-.tag.format { background:#3b2f2f; color:#e8d5b7; border-color:#3b2f2f; }
-.tag.status-reading { background:#e8f0e8; border-color:#90b090; color:#4a6a4a; }
-.tag.status-done { background:#e8e0f0; border-color:#9080b0; color:#4a3a6a; }
-.tag.status-want { background:#f0ece0; border-color:#c0b080; color:#6a5a2a; }
-.book-stars { display:flex; gap:2px; }
-.book-star { color:#d4b896; font-size:0.9rem; }
-.book-star.lit { color:#a07850; }
-.book-actions { display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
-.icon-btn { background:none; border:1px solid #d4b896; border-radius:2px; padding:5px 9px; color:#8a6a50; cursor:pointer; font-size:0.8rem; font-family:'Lora',serif; transition:all 0.15s; }
-.icon-btn:hover { background:#3b2f2f; color:#e8d5b7; border-color:#3b2f2f; }
-.log-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:20px; }
-.log-day { aspect-ratio:1; border-radius:2px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; border:1px solid #d4b896; background:#fdf8f0; transition:all 0.15s; font-size:0.7rem; color:#8a6a50; font-family:'Lora',serif; gap:2px; }
-.log-day:hover { border-color:#a07850; }
-.log-day.read { background:#3b2f2f; border-color:#3b2f2f; color:#e8d5b7; }
-.log-day.today { border-color:#a07850; border-width:2px; }
-.log-day-num { font-weight:600; font-size:0.85rem; }
-.log-book-label { font-size:0.55rem; opacity:0.75; text-align:center; line-height:1.2; }
-.month-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-.month-label { font-family:'Playfair Display',serif; font-size:1.1rem; font-style:italic; color:#3b2f2f; }
-.day-labels { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:6px; }
-.day-label { text-align:center; font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; color:#a07850; font-family:'Lora',serif; }
-.stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px; }
-.stat-box { background:#3b2f2f; border-radius:2px; padding:20px; text-align:center; color:#e8d5b7; }
-.stat-num { font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; }
-.stat-label { font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase; color:#a07850; margin-top:4px; }
-.progress-bar-wrap { background:#e0cebc; border-radius:2px; height:6px; margin-top:6px; overflow:hidden; }
-.progress-bar { height:100%; background:#a07850; border-radius:2px; transition:width 0.3s; }
-.empty { text-align:center; padding:40px; color:#a07850; font-style:italic; font-size:0.95rem; }
-.modal-overlay { position:fixed; inset:0; background:rgba(59,47,47,0.6); display:flex; align-items:center; justify-content:center; z-index:100; padding:20px; }
-.modal { background:#fffdf8; border:1px solid #d4b896; border-radius:2px; padding:32px; max-width:520px; width:100%; box-shadow:6px 6px 0 #d4b896; max-height:90vh; overflow-y:auto; }
-.modal-title { font-family:'Playfair Display',serif; font-size:1.3rem; font-style:italic; color:#3b2f2f; margin-bottom:20px; }
-.log-book-list { display:flex; flex-direction:column; gap:8px; margin:16px 0; }
-.log-option { display:flex; align-items:center; gap:12px; padding:10px 14px; border:1px solid #d4b896; border-radius:2px; cursor:pointer; background:#fdf8f0; font-family:'Lora',serif; font-size:0.88rem; color:#3b2f2f; transition:all 0.15s; }
-.log-option:hover { border-color:#a07850; }
-.log-option.selected { background:#3b2f2f; color:#e8d5b7; border-color:#3b2f2f; }
-.log-option-cover { width:28px; height:40px; object-fit:cover; border-radius:1px; flex-shrink:0; }
-.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#3b2f2f; color:#e8d5b7; padding:10px 24px; border-radius:2px; font-family:'Lora',serif; font-size:0.85rem; z-index:200; opacity:0; transition:opacity 0.3s; pointer-events:none; white-space:nowrap; }
-.toast.show { opacity:1; }
-.loading { text-align:center; padding:60px; color:#a07850; font-style:italic; font-family:'Lora',serif; }
-@media(max-width:560px) { .form-grid{grid-template-columns:1fr} .stats-grid{grid-template-columns:repeat(2,1fr)} .nav-btn{padding:14px 16px;font-size:0.75rem} .card{padding:20px 16px} .container{padding:24px 14px} .search-row{flex-wrap:nowrap} }
+:root {
+  --sage: #B8C9B0;
+  --sage-light: #D6E4D0;
+  --sage-pale: #EDF3EB;
+  --sage-dark: #6B8F63;
+  --bg: #F0F4EE;
+  --white: #FFFFFF;
+  --ink: #1C2B1A;
+  --ink-soft: #3D5038;
+  --mid: #7A9272;
+  --accent: #E05C2A;
+  --accent-light: #FAE8DF;
+  --border: #D4E0CF;
+  --card-shadow: 0 2px 16px rgba(28,43,26,0.07);
+  --goal-green: #4CAF50;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--ink); }
+.app { min-height: 100vh; background: var(--bg); }
+
+/* HEADER */
+.header {
+  background: var(--sage-pale);
+  padding: 52px 22px 36px;
+  position: relative;
+  overflow: hidden;
+}
+.header-wave {
+  position: absolute;
+  bottom: -2px; left: 0; right: 0;
+  height: 32px;
+  background: var(--bg);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+.header-blob-1 {
+  position: absolute; width: 140px; height: 140px;
+  border-radius: 50%; background: var(--sage); opacity: 0.35;
+  top: -40px; right: -30px;
+}
+.header-blob-2 {
+  position: absolute; width: 80px; height: 80px;
+  border-radius: 50%; background: var(--sage-dark); opacity: 0.15;
+  bottom: 10px; left: -20px;
+}
+.header-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px; position: relative;
+}
+.header-logo { display: flex; align-items: center; gap: 10px; }
+.header-logo-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  overflow: hidden; flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(28,43,26,0.18);
+}
+.header-logo-icon img { width: 100%; height: 100%; object-fit: cover; }
+.header-logo-text {
+  font-family: 'Fraunces', serif; font-size: 1.15rem; font-weight: 700;
+  color: var(--ink); letter-spacing: -0.01em;
+}
+.header-logo-text span { color: var(--sage-dark); }
+.sync-pill {
+  background: var(--sage); border-radius: 20px; padding: 4px 12px;
+  font-size: 0.7rem; font-weight: 600; color: var(--ink-soft);
+}
+.header-greeting-label {
+  font-size: 0.75rem; font-weight: 600; color: var(--mid);
+  letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 4px;
+}
+.header-greeting-title {
+  font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700;
+  color: var(--ink); line-height: 1.1;
+}
+.header-greeting-title em { font-style: italic; color: var(--sage-dark); }
+
+/* GOAL BANNER in header */
+.goal-banner {
+  margin-top: 18px; background: var(--white);
+  border-radius: 16px; padding: 14px 16px;
+  box-shadow: var(--card-shadow); position: relative;
+}
+.goal-banner-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.goal-banner-label {
+  font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--mid);
+}
+.goal-banner-count {
+  font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 700; color: var(--ink);
+}
+.goal-banner-count span { color: var(--sage-dark); }
+.goal-track {
+  height: 8px; background: var(--bg); border-radius: 10px; overflow: hidden;
+}
+.goal-fill {
+  height: 100%; border-radius: 10px;
+  background: linear-gradient(90deg, var(--sage-dark), var(--sage));
+  transition: width 0.5s ease;
+}
+.goal-fill.complete { background: linear-gradient(90deg, #4CAF50, #81C784); }
+.goal-edit-btn {
+  position: absolute; top: 10px; right: 12px;
+  background: none; border: none; color: var(--mid);
+  font-size: 0.72rem; font-weight: 700; cursor: pointer;
+  font-family: 'Nunito', sans-serif; padding: 2px 6px; border-radius: 6px;
+}
+.goal-edit-btn:hover { background: var(--sage-pale); color: var(--ink); }
+.goal-set-prompt {
+  text-align: center; padding: 4px 0;
+}
+.goal-set-link {
+  font-size: 0.8rem; font-weight: 700; color: var(--sage-dark); cursor: pointer;
+  text-decoration: underline; font-family: 'Nunito', sans-serif;
+  background: none; border: none;
+}
+
+/* NAV */
+.nav {
+  display: flex; justify-content: space-around;
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 0 10px; position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 1px 8px rgba(28,43,26,0.06);
+}
+.nav-btn {
+  flex: 1; background: none; border: none; color: var(--mid);
+  font-family: 'Nunito', sans-serif; font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.04em; padding: 14px 6px 12px; cursor: pointer;
+  transition: color 0.2s; position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+.nav-btn .nav-icon { font-size: 1.1rem; }
+.nav-btn.active { color: var(--ink); }
+.nav-btn.active::after {
+  content: ''; position: absolute; bottom: 0; left: 20%; right: 20%;
+  height: 3px; background: var(--sage-dark); border-radius: 3px 3px 0 0;
+}
+
+/* CONTAINER */
+.container { max-width: 640px; margin: 0 auto; padding: 22px 16px 80px; }
+
+/* CARDS */
+.card {
+  background: var(--white); border-radius: 20px; padding: 20px;
+  margin-bottom: 14px; box-shadow: var(--card-shadow); border: 1px solid var(--border);
+}
+
+/* PAGE HEADER */
+.page-header {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 18px;
+}
+.page-title {
+  font-family: 'Fraunces', serif; font-size: 1.6rem;
+  font-weight: 700; color: var(--ink); line-height: 1;
+}
+.page-count {
+  font-size: 0.75rem; font-weight: 700; color: var(--mid);
+  margin-top: 3px; letter-spacing: 0.04em; text-transform: uppercase;
+}
+
+/* BUTTONS */
+.btn-add {
+  background: var(--ink); color: var(--white); border: none; border-radius: 14px;
+  padding: 11px 20px; font-family: 'Nunito', sans-serif; font-size: 0.85rem;
+  font-weight: 800; cursor: pointer; transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.btn-add:hover { background: var(--sage-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(28,43,26,0.15); }
+.btn-add:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+.btn-primary {
+  background: var(--sage-dark); color: var(--white); border: none; border-radius: 14px;
+  padding: 12px 22px; font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem; font-weight: 800; cursor: pointer; transition: all 0.2s;
+}
+.btn-primary:hover { background: var(--ink); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-secondary {
+  background: var(--sage-pale); color: var(--ink-soft);
+  border: 1.5px solid var(--border); border-radius: 14px;
+  padding: 11px 18px; font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.btn-secondary:hover { background: var(--sage-light); border-color: var(--sage); }
+
+.btn-ghost {
+  background: none; border: none; color: var(--mid);
+  font-family: 'Nunito', sans-serif; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; padding: 6px 10px; border-radius: 10px; transition: all 0.15s;
+}
+.btn-ghost:hover { background: var(--sage-pale); color: var(--ink); }
+.btn-ghost.danger:hover { background: #FDE8E8; color: #C0392B; }
+.btn-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+
+/* FORMS */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); }
+.form-input, .form-select, .form-textarea {
+  background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px;
+  padding: 11px 14px; font-family: 'Nunito', sans-serif; font-size: 0.9rem;
+  font-weight: 500; color: var(--ink); outline: none;
+  transition: border-color 0.2s, background 0.2s; width: 100%;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--sage-dark); background: var(--white);
+}
+.form-textarea { resize: vertical; min-height: 76px; }
+
+/* FORMAT PILLS */
+.format-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.format-pill {
+  flex: 1; min-width: 80px; background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 10px 8px; font-family: 'Nunito', sans-serif;
+  font-size: 0.8rem; font-weight: 700; color: var(--mid);
+  cursor: pointer; transition: all 0.18s; text-align: center;
+}
+.format-pill.selected { background: var(--ink); border-color: var(--ink); color: var(--white); }
+.format-pill:hover:not(.selected) { border-color: var(--sage-dark); color: var(--ink-soft); }
+
+/* STARS */
+.stars { display: flex; gap: 4px; }
+.star { font-size: 1.4rem; cursor: pointer; color: var(--border); transition: color 0.12s; }
+.star.lit { color: var(--accent); }
+
+/* SEARCH */
+.search-row { display: flex; gap: 8px; width: 100%; margin-bottom: 10px; }
+.search-row .form-input { flex: 1; min-width: 0; }
+.search-go {
+  background: var(--sage-dark); color: var(--white); border: none; border-radius: 12px;
+  padding: 11px 18px; font-family: 'Nunito', sans-serif; font-size: 0.85rem;
+  font-weight: 800; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.2s;
+}
+.search-go:hover { background: var(--ink); }
+.search-go:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.results-list {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 16px; max-height: 360px; overflow-y: auto; box-shadow: var(--card-shadow);
+}
+.result-row {
+  display: flex; gap: 13px; padding: 13px 15px; border-bottom: 1px solid var(--bg);
+  cursor: pointer; transition: background 0.12s; align-items: flex-start;
+}
+.result-row:last-of-type { border-bottom: none; }
+.result-row:hover { background: var(--sage-pale); }
+.result-thumb { width: 40px; height: 58px; object-fit: cover; border-radius: 7px; flex-shrink: 0; }
+.result-thumb-ph {
+  width: 40px; height: 58px; background: var(--sage-light); border-radius: 7px;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+}
+.result-title { font-family: 'Fraunces', serif; font-size: 0.92rem; font-weight: 600; color: var(--ink); line-height: 1.3; }
+.result-author { font-size: 0.78rem; color: var(--mid); margin-top: 2px; font-weight: 500; }
+.result-meta { font-size: 0.7rem; color: var(--sage-dark); margin-top: 3px; font-weight: 700; }
+.manual-tip {
+  text-align: center; padding: 12px; border-top: 1px solid var(--bg);
+  font-size: 0.8rem; color: var(--mid); cursor: pointer; font-weight: 600;
+}
+.manual-tip:hover { color: var(--ink); }
+.manual-tip span { text-decoration: underline; }
+.no-results { padding: 24px; text-align: center; color: var(--mid); font-size: 0.88rem; }
+.skip-link { font-size: 0.8rem; color: var(--mid); cursor: pointer; margin-top: 10px; display: block; text-align: right; font-weight: 600; }
+.skip-link:hover { color: var(--ink); }
+.skip-link span { text-decoration: underline; }
+
+/* BOOK ITEMS */
+.book-item {
+  background: var(--white); border: 1px solid var(--border); border-radius: 18px;
+  padding: 15px; margin-bottom: 12px; display: flex; gap: 14px;
+  align-items: flex-start; box-shadow: var(--card-shadow);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.book-item:hover { transform: translateY(-1px); box-shadow: 0 5px 20px rgba(28,43,26,0.10); }
+.book-cover-wrap { cursor: pointer; flex-shrink: 0; }
+.book-cover { width: 56px; height: 80px; object-fit: cover; border-radius: 9px; display: block; box-shadow: 2px 3px 10px rgba(28,43,26,0.15); }
+.book-cover-ph {
+  width: 56px; height: 80px; border-radius: 9px;
+  background: linear-gradient(145deg, var(--sage), var(--sage-dark));
+  display: flex; align-items: center; justify-content: center; font-size: 1.6rem;
+  box-shadow: 2px 3px 10px rgba(28,43,26,0.15);
+}
+.book-info { flex: 1; min-width: 0; }
+.book-title-link {
+  font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 700;
+  color: var(--ink); line-height: 1.3; cursor: pointer;
+  background: none; border: none; padding: 0; text-align: left; width: 100%;
+}
+.book-title-link:hover { color: var(--sage-dark); }
+.book-author { font-size: 0.78rem; color: var(--mid); margin-top: 2px; font-weight: 500; }
+.book-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; align-items: center; }
+.tag {
+  background: var(--sage-pale); border-radius: 20px; padding: 3px 10px;
+  font-size: 0.68rem; font-weight: 700; color: var(--mid); letter-spacing: 0.02em;
+}
+.tag.t-format { background: var(--ink); color: var(--white); }
+.tag.t-reading { background: #DFF5E8; color: #276645; }
+.tag.t-done { background: var(--sage-light); color: var(--sage-dark); }
+.tag.t-want { background: var(--accent-light); color: var(--accent); }
+.book-stars { display: flex; gap: 1px; }
+.book-star { font-size: 0.82rem; color: var(--border); }
+.book-star.lit { color: var(--accent); }
+.book-actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+.book-date { font-size: 0.7rem; color: var(--mid); margin-top: 5px; font-weight: 600; }
+.book-notes { font-size: 0.78rem; color: var(--mid); margin-top: 6px; font-style: italic; line-height: 1.5; }
+
+/* FORM COVER HEADER */
+.form-cover-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border);
+}
+.form-cover-img { width: 52px; height: 74px; object-fit: cover; border-radius: 8px; box-shadow: 2px 3px 10px rgba(28,43,26,0.14); flex-shrink: 0; }
+.form-cover-title { font-family: 'Fraunces', serif; font-size: 1.1rem; font-weight: 700; color: var(--ink); line-height: 1.3; }
+.form-cover-author { font-size: 0.8rem; color: var(--mid); margin-top: 3px; }
+.section-label { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); margin-bottom: 14px; }
+
+/* CALENDAR */
+.month-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.month-label { font-family: 'Fraunces', serif; font-size: 1.25rem; font-weight: 700; color: var(--ink); }
+.cal-nav-btn {
+  background: var(--sage-pale); border: none; border-radius: 10px;
+  width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 1rem; color: var(--ink-soft); font-weight: 700; transition: all 0.15s;
+}
+.cal-nav-btn:hover { background: var(--ink); color: var(--white); }
+.day-labels { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-bottom: 5px; }
+.day-label { text-align: center; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mid); padding: 3px 0; }
+.log-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 5px; }
+.log-day {
+  aspect-ratio: 1; border-radius: 10px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; cursor: pointer; background: var(--bg);
+  transition: all 0.15s; font-size: 0.72rem; color: var(--ink-soft);
+  gap: 1px; border: 1.5px solid transparent; font-weight: 600;
+}
+.log-day:hover { border-color: var(--sage-dark); background: var(--sage-pale); }
+.log-day.read { background: var(--sage-dark); color: var(--white); border-color: var(--sage-dark); }
+.log-day.today { border-color: var(--accent); }
+.log-day.read.today { border-color: var(--ink); }
+.log-day-num { font-weight: 800; font-size: 0.82rem; }
+.log-book-label { font-size: 0.5rem; opacity: 0.85; text-align: center; line-height: 1.1; }
+.log-hint { margin-top: 14px; font-size: 0.75rem; color: var(--mid); text-align: center; font-weight: 600; }
+
+/* STATS */
+.stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 11px; margin-bottom: 16px; }
+.stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 16px 12px; text-align: center; box-shadow: var(--card-shadow); }
+.stat-card.accent { background: var(--sage-dark); border-color: var(--sage-dark); }
+.stat-num { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; color: var(--ink); line-height: 1; }
+.stat-card.accent .stat-num { color: var(--white); }
+.stat-lbl { font-size: 0.64rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-top: 5px; }
+.stat-card.accent .stat-lbl { color: rgba(255,255,255,0.65); }
+.bar-row { margin-bottom: 15px; }
+.bar-label-row { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 7px; color: var(--ink-soft); }
+.bar-count { color: var(--accent); font-weight: 800; }
+.bar-track { background: var(--bg); border-radius: 6px; height: 6px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--sage-dark); border-radius: 6px; transition: width 0.4s; }
+
+/* GOAL SETTINGS card */
+.goal-input-row { display: flex; gap: 10px; align-items: center; }
+.goal-input-row .form-input { max-width: 100px; text-align: center; font-size: 1.1rem; font-weight: 800; }
+.goal-year { font-size: 0.82rem; font-weight: 700; color: var(--mid); }
+.goal-congrats {
+  background: linear-gradient(135deg, var(--sage-pale), #E8F5E9);
+  border: 1.5px solid var(--sage-light); border-radius: 14px;
+  padding: 14px 16px; text-align: center; margin-bottom: 16px;
+}
+.goal-congrats-title { font-family: 'Fraunces', serif; font-size: 1.1rem; font-weight: 700; color: var(--sage-dark); }
+.goal-congrats-sub { font-size: 0.82rem; color: var(--mid); margin-top: 4px; font-weight: 600; }
+
+/* MODAL / BOTTOM SHEET */
+.modal-overlay { position: fixed; inset: 0; background: rgba(28,43,26,0.45); display: flex; align-items: flex-end; z-index: 100; }
+.modal {
+  background: var(--white); border-radius: 24px 24px 0 0;
+  padding: 12px 22px 44px; width: 100%; max-height: 88vh; overflow-y: auto;
+  box-shadow: 0 -6px 40px rgba(28,43,26,0.14);
+}
+.modal-handle { width: 38px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 18px; }
+.modal-title { font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); margin-bottom: 14px; }
+
+/* BOOK DETAIL SHEET */
+.detail-cover-row { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 20px; }
+.detail-cover { width: 80px; height: 116px; object-fit: cover; border-radius: 10px; flex-shrink: 0; box-shadow: 3px 4px 14px rgba(28,43,26,0.18); }
+.detail-cover-ph {
+  width: 80px; height: 116px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(145deg, var(--sage), var(--sage-dark));
+  display: flex; align-items: center; justify-content: center; font-size: 2rem;
+  box-shadow: 3px 4px 14px rgba(28,43,26,0.18);
+}
+.detail-title { font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.detail-author { font-size: 0.85rem; color: var(--mid); margin-top: 4px; font-weight: 500; }
+.detail-meta-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.detail-divider { height: 1px; background: var(--border); margin: 16px 0; }
+.detail-section-label { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); margin-bottom: 8px; }
+.detail-synopsis { font-size: 0.88rem; line-height: 1.7; color: var(--ink-soft); font-weight: 500; }
+.detail-synopsis-loading { font-size: 0.85rem; color: var(--mid); font-style: italic; }
+.detail-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.detail-info-item { background: var(--bg); border-radius: 12px; padding: 12px 14px; }
+.detail-info-item-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--mid); margin-bottom: 4px; }
+.detail-info-item-value { font-size: 0.9rem; font-weight: 700; color: var(--ink); }
+.detail-stars { display: flex; gap: 3px; }
+.detail-star { font-size: 1rem; color: var(--border); }
+.detail-star.lit { color: var(--accent); }
+.detail-notes { font-size: 0.85rem; line-height: 1.6; color: var(--ink-soft); font-style: italic; font-weight: 500; }
+
+/* LOG MODAL */
+.log-option {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+  border: 1.5px solid var(--border); border-radius: 14px; cursor: pointer;
+  margin-bottom: 8px; transition: all 0.15s; background: var(--white);
+}
+.log-option:hover { border-color: var(--sage-dark); background: var(--sage-pale); }
+.log-option.selected { background: var(--sage-dark); border-color: var(--sage-dark); color: var(--white); }
+.log-option-cover { width: 30px; height: 42px; object-fit: cover; border-radius: 5px; flex-shrink: 0; }
+.log-option-text { font-size: 0.88rem; font-weight: 700; }
+.log-option-sub { font-size: 0.72rem; opacity: 0.65; margin-top: 1px; }
+
+/* EMPTY */
+.empty { text-align: center; padding: 52px 20px; color: var(--mid); }
+.empty-icon { font-size: 2.8rem; margin-bottom: 14px; }
+.empty-title { font-family: 'Fraunces', serif; font-size: 1.2rem; font-weight: 700; color: var(--ink-soft); margin-bottom: 6px; }
+.empty-sub { font-size: 0.85rem; font-weight: 500; line-height: 1.5; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: var(--white); padding: 11px 24px; border-radius: 22px;
+  font-family: 'Nunito', sans-serif; font-size: 0.83rem; font-weight: 700;
+  z-index: 200; opacity: 0; transition: opacity 0.25s; pointer-events: none;
+  white-space: nowrap; box-shadow: 0 4px 20px rgba(28,43,26,0.22);
+}
+.toast.show { opacity: 1; }
+
+/* LOADING */
+.loading {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 55vh; font-family: 'Fraunces', serif; font-style: italic;
+  font-size: 1.1rem; color: var(--mid);
+}
+
+@media(max-width:560px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .container { padding: 18px 14px 80px; }
+  .header { padding: 48px 18px 30px; }
+  .detail-info-grid { grid-template-columns: 1fr 1fr; }
+}
 `;
 
 const FORMATS = ["📖 Physical","📱 Digital","🎧 Audiobook"];
@@ -166,7 +525,11 @@ const GENRES = ["Fiction","Non-Fiction","Literary Fiction","Romance","Mystery","
 const today = new Date();
 const todayStr = today.toISOString().slice(0,10);
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-const emptyForm = { title:'',author:'',genre:'',format:'',status:'Want to Read',start_date:'',end_date:'',total_pages:'',rating:0,notes:'',cover_url:'' };
+const CURRENT_YEAR = today.getFullYear();
+const emptyForm = { title:'',author:'',genre:'',format:'',status:'Want to Read',start_date:'',end_date:'',total_pages:'',rating:0,notes:'',cover_url:'',ol_key:'' };
+
+// Icon — daughter's illustration hosted in the repo's public folder
+const ICON_URL = "/icon.png";
 
 function StarRating({ value, onChange }) {
   const [hover, setHover] = useState(0);
@@ -184,7 +547,6 @@ function BookSearch({ onSelect }) {
   const [q, setQ] = useState('');
   const [results, setResults] = useState(null);
   const [busy, setBusy] = useState(false);
-
   async function go() {
     if (!q.trim()) return;
     setBusy(true);
@@ -192,18 +554,17 @@ function BookSearch({ onSelect }) {
     catch { setResults([]); }
     setBusy(false);
   }
-
   return (
     <div>
-      <label style={{display:'block',marginBottom:8}}>Search for a Book</label>
+      <div className="form-label" style={{marginBottom:8}}>Search by title or author</div>
       <div className="search-row">
-        <input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==='Enter'&&go()} placeholder="Title, author, or keyword…" autoComplete="off" />
+        <input className="form-input" value={q} onChange={e=>setQ(e.target.value)}
+          onKeyDown={e=>e.key==='Enter'&&go()} placeholder="e.g. Beloved, Toni Morrison…" autoComplete="off" />
         <button className="search-go" onClick={go} disabled={busy}>{busy?'Searching…':'Search'}</button>
       </div>
-
       {results !== null && (
         <div className="results-list">
-          {results.length===0 && <div className="no-results">No results — try a different title or author.</div>}
+          {results.length===0 && <div className="no-results">No results — try a different search.</div>}
           {results.map((r,i)=>(
             <div key={i} className="result-row" onClick={()=>onSelect(r)}>
               {r.cover_url
@@ -219,9 +580,165 @@ function BookSearch({ onSelect }) {
           <div className="manual-tip" onClick={()=>onSelect(null)}>Don't see it? <span>Enter manually →</span></div>
         </div>
       )}
-
       {results===null && (
         <div className="skip-link" onClick={()=>onSelect(null)}><span>Skip — enter manually →</span></div>
+      )}
+    </div>
+  );
+}
+
+// Book Detail Bottom Sheet
+function BookDetailSheet({ book, onClose, onEdit }) {
+  const [synopsis, setSynopsis] = useState(null); // null = loading, '' = none found
+
+  useEffect(()=>{
+    if (!book) return;
+    setSynopsis(null);
+    if (book.ol_key) {
+      fetchBookDetails(book.ol_key).then(s => setSynopsis(s));
+    } else {
+      setSynopsis('');
+    }
+  }, [book]);
+
+  if (!book) return null;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <div className="modal-handle"/>
+
+        {/* Cover + title */}
+        <div className="detail-cover-row">
+          {book.cover_url
+            ? <img src={book.cover_url} alt={book.title} className="detail-cover" onError={e=>e.target.style.display='none'} />
+            : <div className="detail-cover-ph">📖</div>}
+          <div style={{flex:1}}>
+            <div className="detail-title">{book.title}</div>
+            {book.author && <div className="detail-author">by {book.author}</div>}
+            <div className="detail-meta-row">
+              {book.format && <span className="tag t-format">{book.format}</span>}
+              {book.genre && <span className="tag">{book.genre}</span>}
+              {book.status && <span className={`tag ${book.status==='Reading'?'t-reading':book.status==='Finished'?'t-done':'t-want'}`}>{book.status}</span>}
+            </div>
+            {book.rating>0 && (
+              <div className="detail-stars" style={{marginTop:8}}>
+                {[1,2,3,4,5].map(n=><span key={n} className={`detail-star ${n<=book.rating?'lit':''}`}>★</span>)}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Info grid */}
+        <div className="detail-info-grid" style={{marginBottom:16}}>
+          {book.total_pages && (
+            <div className="detail-info-item">
+              <div className="detail-info-item-label">Pages</div>
+              <div className="detail-info-item-value">{book.total_pages}</div>
+            </div>
+          )}
+          {book.start_date && (
+            <div className="detail-info-item">
+              <div className="detail-info-item-label">Started</div>
+              <div className="detail-info-item-value">{book.start_date}</div>
+            </div>
+          )}
+          {book.end_date && (
+            <div className="detail-info-item">
+              <div className="detail-info-item-label">Finished</div>
+              <div className="detail-info-item-value">{book.end_date}</div>
+            </div>
+          )}
+        </div>
+
+        {/* Synopsis */}
+        <div className="detail-divider"/>
+        <div className="detail-section-label">About This Book</div>
+        {synopsis === null && <div className="detail-synopsis-loading">Fetching synopsis…</div>}
+        {synopsis === '' && <div className="detail-synopsis-loading">No synopsis available for this book.</div>}
+        {synopsis && <div className="detail-synopsis">{synopsis}</div>}
+
+        {/* Notes */}
+        {book.notes && <>
+          <div className="detail-divider"/>
+          <div className="detail-section-label">My Notes</div>
+          <div className="detail-notes">"{book.notes}"</div>
+        </>}
+
+        <div className="btn-row" style={{marginTop:20}}>
+          <button className="btn-primary" onClick={()=>{onEdit(book);onClose();}}>Edit Book</button>
+          <button className="btn-secondary" onClick={onClose}>Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Goal Banner
+function GoalBanner({ books, goalYear, onSetGoal }) {
+  const [editing, setEditing] = useState(false);
+  const [inputVal, setInputVal] = useState(goalYear||'');
+
+  const finishedThisYear = books.filter(b => b.status==='Finished' && b.end_date && b.end_date.startsWith(String(CURRENT_YEAR))).length;
+
+  function save() {
+    const n = parseInt(inputVal);
+    if (n > 0) { onSetGoal(n); setEditing(false); }
+  }
+
+  if (editing) {
+    return (
+      <div className="goal-banner">
+        <div className="section-label" style={{marginBottom:10}}>Set Your {CURRENT_YEAR} Reading Goal</div>
+        <div className="goal-input-row">
+          <input className="form-input" type="number" min="1" max="365"
+            value={inputVal} onChange={e=>setInputVal(e.target.value)}
+            onKeyDown={e=>e.key==='Enter'&&save()} placeholder="e.g. 24" autoFocus />
+          <span className="goal-year">books in {CURRENT_YEAR}</span>
+        </div>
+        <div className="btn-row" style={{marginTop:12}}>
+          <button className="btn-primary" style={{padding:'9px 18px',fontSize:'0.8rem'}} onClick={save}>Save Goal</button>
+          <button className="btn-secondary" style={{padding:'8px 14px',fontSize:'0.8rem'}} onClick={()=>setEditing(false)}>Cancel</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!goalYear) {
+    return (
+      <div className="goal-banner">
+        <div className="goal-set-prompt">
+          <div className="goal-banner-label" style={{marginBottom:6}}>📚 Reading Goal</div>
+          <button className="goal-set-link" onClick={()=>setEditing(true)}>Set your {CURRENT_YEAR} reading goal →</button>
+        </div>
+      </div>
+    );
+  }
+
+  const pct = Math.min(100, Math.round((finishedThisYear / goalYear) * 100));
+  const complete = finishedThisYear >= goalYear;
+
+  return (
+    <div className="goal-banner">
+      <button className="goal-edit-btn" onClick={()=>{ setInputVal(goalYear); setEditing(true); }}>Edit</button>
+      <div className="goal-banner-row">
+        <div className="goal-banner-label">{CURRENT_YEAR} Reading Goal</div>
+        <div className="goal-banner-count">
+          <span>{finishedThisYear}</span> / {goalYear} books
+        </div>
+      </div>
+      <div className="goal-track">
+        <div className={`goal-fill ${complete?'complete':''}`} style={{width:`${pct}%`}}/>
+      </div>
+      {complete && (
+        <div style={{fontSize:'0.75rem',fontWeight:700,color:'#4CAF50',marginTop:8,textAlign:'center'}}>
+          🎉 Goal reached! You're on a roll!
+        </div>
+      )}
+      {!complete && (
+        <div style={{fontSize:'0.72rem',color:'var(--mid)',marginTop:7,textAlign:'right',fontWeight:600}}>
+          {goalYear - finishedThisYear} more to go · {pct}%
+        </div>
       )}
     </div>
   );
@@ -233,7 +750,7 @@ export default function App() {
   const [logMap, setLogMap] = useState({});
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
-  const [mode, setMode] = useState('list'); // list | search | form
+  const [mode, setMode] = useState('list');
   const [logModal, setLogModal] = useState(null);
   const [logBook, setLogBook] = useState('');
   const [calMonth, setCalMonth] = useState(today.getMonth());
@@ -241,13 +758,27 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState('');
+  const [detailBook, setDetailBook] = useState(null);
+  const [goalYear, setGoalYear] = useState(() => {
+    const saved = localStorage.getItem('bookishtee_goal');
+    return saved ? parseInt(saved) : null;
+  });
 
   function showToast(msg) { setToast(msg); setTimeout(()=>setToast(''),2500); }
+
+  function handleSetGoal(n) {
+    setGoalYear(n);
+    try { localStorage.setItem('bookishtee_goal', String(n)); } catch {}
+    showToast(`Goal set: ${n} books in ${CURRENT_YEAR} 🎯`);
+  }
 
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [b,l] = await Promise.all([sbGet('books','order=created_at.asc'), sbGet('reading_log','order=log_date.asc')]);
+      const [b,l] = await Promise.all([
+        sbGet('books','order=created_at.asc'),
+        sbGet('reading_log','order=log_date.asc')
+      ]);
       setBooks(Array.isArray(b)?b:[]);
       const lm={};
       if(Array.isArray(l)) l.forEach(x=>{lm[x.log_date]=x;});
@@ -259,22 +790,18 @@ export default function App() {
   useEffect(()=>{loadData();},[loadData]);
 
   function startAdd() { setForm(emptyForm); setEditId(null); setMode('search'); }
-
-  function onSearchSelect(result) {
-    if (result) {
-      setForm(f=>({...f,
-        title: result.title||'',
-        author: result.author||'',
-        total_pages: result.pages?String(result.pages):'',
-        cover_url: result.cover_url||'',
-        genre: result.genre||'',
-      }));
-    }
+  function onSearchSelect(r) {
+    if(r) setForm(f=>({...f,
+      title:r.title||'', author:r.author||'',
+      total_pages:r.pages?String(r.pages):'',
+      cover_url:r.cover_url||'', genre:r.genre||'',
+      ol_key:r.ol_key||''
+    }));
     setMode('form');
   }
 
   async function saveBook() {
-    if (!form.title.trim()) return;
+    if(!form.title.trim()) return;
     setSaving(true);
     try {
       const p = {
@@ -301,7 +828,7 @@ export default function App() {
   }
 
   function editBook(b) {
-    setForm({...b,total_pages:b.total_pages||'',start_date:b.start_date||'',end_date:b.end_date||'',cover_url:b.cover_url||''});
+    setForm({...b, total_pages:b.total_pages||'', start_date:b.start_date||'', end_date:b.end_date||'', cover_url:b.cover_url||'', ol_key:b.ol_key||''});
     setEditId(b.id); setMode('form'); setTab('shelf');
   }
 
@@ -321,115 +848,166 @@ export default function App() {
   const daysInMonth = new Date(calYear,calMonth+1,0).getDate();
   const firstDay = new Date(calYear,calMonth,1).getDay();
   const finishedCount = books.filter(b=>b.status==='Finished').length;
+  const finishedThisYear = books.filter(b=>b.status==='Finished' && b.end_date && b.end_date.startsWith(String(CURRENT_YEAR))).length;
   const currentlyReading = books.filter(b=>b.status==='Reading');
-  function stTag(s){if(s==='Reading')return 'status-reading';if(s==='Finished')return 'status-done';return 'status-want';}
+  function stTag(s){if(s==='Reading')return 't-reading';if(s==='Finished')return 't-done';return 't-want';}
 
   if(loading) return (
     <><style>{FONTS}{STYLES}</style>
-    <div className="app"><div className="header"><div className="header-title">My Reading Life</div></div>
-    <div className="loading">Loading your books from the cloud…</div></div></>
+    <div className="app">
+      <div className="header">
+        <div className="header-blob-1"/><div className="header-blob-2"/>
+        <div className="header-top">
+          <div className="header-logo">
+            <div className="header-logo-icon"><img src={ICON_URL} alt="BookishTee" onError={e=>{e.target.style.display='none';e.target.parentNode.textContent='📚';}}/></div>
+            <div className="header-logo-text">Bookish<span>Tee</span></div>
+          </div>
+        </div>
+      </div>
+      <div className="loading">Loading your shelf…</div>
+    </div></>
   );
 
   return (
     <><style>{FONTS}{STYLES}</style>
     <div className="app">
+
+      {/* HEADER */}
       <div className="header">
-        <div className="header-title">My Reading Life</div>
-        <div className="header-sub">A Personal Book Tracker</div>
-        {saving && <div className="sync-dot">Syncing…</div>}
+        <div className="header-blob-1"/><div className="header-blob-2"/>
+        <div className="header-wave"/>
+        <div className="header-top">
+          <div className="header-logo">
+            <div className="header-logo-icon">
+              <img src={ICON_URL} alt="BookishTee"
+                onError={e=>{e.target.style.display='none';e.target.parentNode.style.background='var(--ink)';e.target.parentNode.textContent='📚';}}/>
+            </div>
+            <div className="header-logo-text">Bookish<span>Tee</span></div>
+          </div>
+          {saving && <div className="sync-pill">Syncing…</div>}
+        </div>
+        <div className="header-greeting" style={{marginBottom:16}}>
+          <div className="header-greeting-label">Welcome back</div>
+          <div className="header-greeting-title">Your Reading <em>Life</em></div>
+        </div>
+        <GoalBanner books={books} goalYear={goalYear} onSetGoal={handleSetGoal} />
       </div>
+
+      {/* NAV */}
       <nav className="nav">
-        {[['shelf','My Shelf'],['log','Reading Log'],['stats','Stats']].map(([key,label])=>(
-          <button key={key} className={`nav-btn ${tab===key?'active':''}`} onClick={()=>setTab(key)}>{label}</button>
-        ))}
+        <button className={`nav-btn ${tab==='shelf'?'active':''}`} onClick={()=>setTab('shelf')}>
+          <span className="nav-icon">📚</span>Shelf
+        </button>
+        <button className={`nav-btn ${tab==='log'?'active':''}`} onClick={()=>setTab('log')}>
+          <span className="nav-icon">📅</span>Log
+        </button>
+        <button className={`nav-btn ${tab==='stats'?'active':''}`} onClick={()=>setTab('stats')}>
+          <span className="nav-icon">📊</span>Stats
+        </button>
       </nav>
 
       <div className="container">
 
         {/* ── SHELF ── */}
         {tab==='shelf' && <>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
-            <h2 className="section-title" style={{marginBottom:0,borderBottom:'none',paddingBottom:0}}>My Books</h2>
-            {mode==='list' && <button className="btn" onClick={startAdd}>+ Add Book</button>}
+          <div className="page-header">
+            <div>
+              <div className="page-title">My Shelf</div>
+              {books.length > 0 && <div className="page-count">{books.length} book{books.length!==1?'s':''}</div>}
+            </div>
+            {mode==='list' && <button className="btn-add" onClick={startAdd}>+ Add Book</button>}
           </div>
 
           {mode==='search' && (
-            <div className="card" style={{marginBottom:24}}>
-              <div className="section-title">Add a New Book</div>
+            <div className="card" style={{marginBottom:16}}>
+              <div style={{fontFamily:"'Fraunces',serif",fontSize:'1.15rem',fontWeight:700,color:'var(--ink)',marginBottom:16}}>Find a Book</div>
               <BookSearch onSelect={onSearchSelect} />
-              <button className="btn secondary" style={{marginTop:16}} onClick={()=>setMode('list')}>Cancel</button>
+              <div className="btn-row">
+                <button className="btn-secondary" onClick={()=>setMode('list')}>Cancel</button>
+              </div>
             </div>
           )}
 
           {mode==='form' && (
-            <div className="card" style={{marginBottom:24}}>
-              <div style={{display:'flex',alignItems:'center',gap:16,marginBottom:20}}>
-                {form.cover_url && <img src={form.cover_url} alt="cover" style={{width:52,height:76,objectFit:'cover',borderRadius:2,boxShadow:'2px 2px 6px rgba(59,47,47,0.2)',flexShrink:0}} onError={e=>e.target.style.display='none'} />}
-                <div className="section-title" style={{marginBottom:0,borderBottom:'none',paddingBottom:0}}>
-                  {editId?'Edit Book':form.title||'Book Details'}
+            <div className="card" style={{marginBottom:16}}>
+              {(form.cover_url||form.title) && (
+                <div className="form-cover-header">
+                  {form.cover_url && <img src={form.cover_url} alt="cover" className="form-cover-img" onError={e=>e.target.style.display='none'} />}
+                  <div>
+                    <div className="form-cover-title">{form.title||'New Book'}</div>
+                    {form.author && <div className="form-cover-author">by {form.author}</div>}
+                  </div>
                 </div>
-              </div>
+              )}
               <div className="form-grid">
-                <div className="form-group"><label>Title</label><input value={form.title} onChange={e=>setForm(f=>({...f,title:e.target.value}))} placeholder="Book title" /></div>
-                <div className="form-group"><label>Author</label><input value={form.author} onChange={e=>setForm(f=>({...f,author:e.target.value}))} placeholder="Author name" /></div>
-                <div className="form-group"><label>Genre</label>
-                  <select value={form.genre} onChange={e=>setForm(f=>({...f,genre:e.target.value}))}>
+                <div className="form-group"><div className="form-label">Title</div><input className="form-input" value={form.title} onChange={e=>setForm(f=>({...f,title:e.target.value}))} placeholder="Book title" /></div>
+                <div className="form-group"><div className="form-label">Author</div><input className="form-input" value={form.author} onChange={e=>setForm(f=>({...f,author:e.target.value}))} placeholder="Author name" /></div>
+                <div className="form-group"><div className="form-label">Genre</div>
+                  <select className="form-select" value={form.genre} onChange={e=>setForm(f=>({...f,genre:e.target.value}))}>
                     <option value="">Select genre</option>
                     {GENRES.map(g=><option key={g}>{g}</option>)}
                   </select>
                 </div>
-                <div className="form-group"><label>Status</label>
-                  <select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))}>
+                <div className="form-group"><div className="form-label">Status</div>
+                  <select className="form-select" value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))}>
                     {STATUSES.map(s=><option key={s}>{s}</option>)}
                   </select>
                 </div>
-                <div className="form-group full"><label>Format</label>
-                  <div className="format-select">
+                <div className="form-group full"><div className="form-label">Format</div>
+                  <div className="format-row">
                     {FORMATS.map(fmt=>(
-                      <button key={fmt} className={`format-btn ${form.format===fmt?'selected':''}`} onClick={()=>setForm(f=>({...f,format:fmt}))}>{fmt}</button>
+                      <button key={fmt} className={`format-pill ${form.format===fmt?'selected':''}`} onClick={()=>setForm(f=>({...f,format:fmt}))}>{fmt}</button>
                     ))}
                   </div>
                 </div>
-                <div className="form-group"><label>Start Date</label><input type="date" value={form.start_date} onChange={e=>setForm(f=>({...f,start_date:e.target.value}))} /></div>
-                <div className="form-group"><label>End Date</label><input type="date" value={form.end_date} onChange={e=>setForm(f=>({...f,end_date:e.target.value}))} /></div>
-                <div className="form-group"><label>Total Pages</label><input type="number" value={form.total_pages} onChange={e=>setForm(f=>({...f,total_pages:e.target.value}))} placeholder="e.g. 320" /></div>
-                <div className="form-group"><label>Rating</label><StarRating value={form.rating} onChange={v=>setForm(f=>({...f,rating:v}))} /></div>
-                <div className="form-group full"><label>Notes / Review</label><textarea value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} placeholder="Your thoughts…" /></div>
+                <div className="form-group"><div className="form-label">Start Date</div><input className="form-input" type="date" value={form.start_date} onChange={e=>setForm(f=>({...f,start_date:e.target.value}))} /></div>
+                <div className="form-group"><div className="form-label">End Date</div><input className="form-input" type="date" value={form.end_date} onChange={e=>setForm(f=>({...f,end_date:e.target.value}))} /></div>
+                <div className="form-group"><div className="form-label">Pages</div><input className="form-input" type="number" value={form.total_pages} onChange={e=>setForm(f=>({...f,total_pages:e.target.value}))} placeholder="e.g. 320" /></div>
+                <div className="form-group"><div className="form-label">Rating</div><StarRating value={form.rating} onChange={v=>setForm(f=>({...f,rating:v}))} /></div>
+                <div className="form-group full"><div className="form-label">Notes</div><textarea className="form-textarea" value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} placeholder="Your thoughts…" /></div>
               </div>
-              <div style={{display:'flex',gap:10,marginTop:8,flexWrap:'wrap'}}>
-                <button className="btn" onClick={saveBook} disabled={saving}>{saving?'Saving…':editId?'Save Changes':'Add to Shelf'}</button>
-                {!editId && <button className="btn secondary" onClick={()=>setMode('search')}>← Back to Search</button>}
-                <button className="btn secondary" onClick={()=>{setMode('list');setEditId(null);setForm(emptyForm);}}>Cancel</button>
+              <div className="btn-row">
+                <button className="btn-primary" onClick={saveBook} disabled={saving}>{saving?'Saving…':editId?'Save Changes':'Add to Shelf'}</button>
+                {!editId && <button className="btn-secondary" onClick={()=>setMode('search')}>← Search</button>}
+                <button className="btn-secondary" onClick={()=>{setMode('list');setEditId(null);setForm(emptyForm);}}>Cancel</button>
               </div>
             </div>
           )}
 
-          {books.length===0 && mode==='list' && <div className="empty">Your shelf is empty — add your first book above.</div>}
+          {books.length===0 && mode==='list' && (
+            <div className="empty">
+              <div className="empty-icon">📖</div>
+              <div className="empty-title">Your shelf is empty</div>
+              <div className="empty-sub">Tap + Add Book to start tracking<br/>your reading journey.</div>
+            </div>
+          )}
 
           {mode==='list' && books.map(b=>(
             <div key={b.id} className="book-item">
-              {b.cover_url
-                ? <img src={b.cover_url} alt={b.title} className="book-cover" onError={e=>e.target.style.display='none'} />
-                : <div className="book-cover-ph">📖</div>}
+              <div className="book-cover-wrap" onClick={()=>setDetailBook(b)}>
+                {b.cover_url
+                  ? <img src={b.cover_url} alt={b.title} className="book-cover" onError={e=>e.target.style.display='none'} />
+                  : <div className="book-cover-ph">📖</div>}
+              </div>
               <div className="book-info">
-                <div className="book-title">{b.title}</div>
+                <button className="book-title-link" onClick={()=>setDetailBook(b)}>{b.title}</button>
                 {b.author && <div className="book-author">by {b.author}</div>}
                 <div className="book-meta">
-                  {b.format && <span className="tag format">{b.format}</span>}
+                  {b.format && <span className="tag t-format">{b.format}</span>}
                   {b.genre && <span className="tag">{b.genre}</span>}
                   {b.status && <span className={`tag ${stTag(b.status)}`}>{b.status}</span>}
                   {b.rating>0 && <span className="book-stars">{[1,2,3,4,5].map(n=><span key={n} className={`book-star ${n<=b.rating?'lit':''}`}>★</span>)}</span>}
                 </div>
                 {(b.start_date||b.end_date) && (
-                  <div style={{fontSize:'0.75rem',color:'#a07850',marginTop:6,fontStyle:'italic'}}>
+                  <div className="book-date">
                     {b.start_date&&`Started ${b.start_date}`}{b.start_date&&b.end_date&&' · '}{b.end_date&&`Finished ${b.end_date}`}
                   </div>
                 )}
-                {b.notes && <div style={{fontSize:'0.82rem',color:'#6a5040',marginTop:8,fontStyle:'italic',lineHeight:1.5}}>"{b.notes}"</div>}
+                {b.notes && <div className="book-notes">"{b.notes}"</div>}
               </div>
               <div className="book-actions">
-                <button className="icon-btn" onClick={()=>editBook(b)}>Edit</button>
-                <button className="icon-btn" style={{color:'#8b3a3a'}} onClick={()=>deleteBook(b.id)}>Remove</button>
+                <button className="btn-ghost" onClick={()=>editBook(b)}>Edit</button>
+                <button className="btn-ghost danger" onClick={()=>deleteBook(b.id)}>✕</button>
               </div>
             </div>
           ))}
@@ -439,12 +1017,12 @@ export default function App() {
         {tab==='log' && (
           <div className="card">
             <div className="month-nav">
-              <button className="icon-btn" onClick={()=>{if(calMonth===0){setCalMonth(11);setCalYear(y=>y-1);}else setCalMonth(m=>m-1);}}>‹</button>
+              <button className="cal-nav-btn" onClick={()=>{if(calMonth===0){setCalMonth(11);setCalYear(y=>y-1);}else setCalMonth(m=>m-1);}}>‹</button>
               <div className="month-label">{MONTHS[calMonth]} {calYear}</div>
-              <button className="icon-btn" onClick={()=>{if(calMonth===11){setCalMonth(0);setCalYear(y=>y+1);}else setCalMonth(m=>m+1);}}>›</button>
+              <button className="cal-nav-btn" onClick={()=>{if(calMonth===11){setCalMonth(0);setCalYear(y=>y+1);}else setCalMonth(m=>m+1);}}>›</button>
             </div>
             <div className="day-labels">
-              {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=><div key={d} className="day-label">{d}</div>)}
+              {['S','M','T','W','T','F','S'].map((d,i)=><div key={i} className="day-label">{d}</div>)}
             </div>
             <div className="log-grid">
               {Array.from({length:firstDay}).map((_,i)=><div key={`e${i}`} />)}
@@ -457,87 +1035,97 @@ export default function App() {
                 return (
                   <div key={day} className={`log-day ${entry?'read':''} ${isToday?'today':''}`} onClick={()=>openLog(dateStr)}>
                     <span className="log-day-num">{day}</span>
-                    {bookTitle && <span className="log-book-label">{bookTitle.length>10?bookTitle.slice(0,9)+'…':bookTitle}</span>}
+                    {bookTitle && <span className="log-book-label">{bookTitle.length>8?bookTitle.slice(0,7)+'…':bookTitle}</span>}
                     {entry&&!bookTitle && <span className="log-book-label">✓</span>}
                   </div>
                 );
               })}
             </div>
-            <div style={{marginTop:16,fontSize:'0.8rem',color:'#a07850',fontStyle:'italic',textAlign:'center'}}>
-              Tap any day to log your reading. Dark = read that day.
-            </div>
+            <div className="log-hint">Tap any day to mark it. Green = read that day.</div>
           </div>
         )}
 
         {/* ── STATS ── */}
         {tab==='stats' && <>
-          <div className="stats-grid">
-            <div className="stat-box"><div className="stat-num">{books.length}</div><div className="stat-label">Books Added</div></div>
-            <div className="stat-box"><div className="stat-num">{finishedCount}</div><div className="stat-label">Finished</div></div>
-            <div className="stat-box"><div className="stat-num">{Object.keys(logMap).length}</div><div className="stat-label">Days Read</div></div>
+          {goalYear && (
+            <div className="goal-congrats" style={finishedThisYear>=goalYear?{}:{background:'var(--white)',border:'1px solid var(--border)'}}>
+              {finishedThisYear>=goalYear
+                ? <><div className="goal-congrats-title">🎉 Goal Reached!</div><div className="goal-congrats-sub">You've finished {finishedThisYear} of {goalYear} books in {CURRENT_YEAR}</div></>
+                : <><div className="goal-congrats-title" style={{color:'var(--ink)'}}>📚 {CURRENT_YEAR} Goal</div><div className="goal-congrats-sub">{finishedThisYear} of {goalYear} books finished · {Math.round((finishedThisYear/goalYear)*100)}% complete</div></>
+              }
+            </div>
+          )}
+
+          <div className="stats-row">
+            <div className="stat-card accent"><div className="stat-num">{books.length}</div><div className="stat-lbl">Total</div></div>
+            <div className="stat-card"><div className="stat-num">{finishedThisYear}</div><div className="stat-lbl">{CURRENT_YEAR}</div></div>
+            <div className="stat-card"><div className="stat-num">{Object.keys(logMap).length}</div><div className="stat-lbl">Days Read</div></div>
           </div>
+
           {currentlyReading.length>0 && (
-            <div className="card">
-              <div className="section-title">Currently Reading</div>
+            <div className="card" style={{marginBottom:14}}>
+              <div className="section-label">Currently Reading</div>
               {currentlyReading.map(b=>(
-                <div key={b.id} style={{display:'flex',gap:14,marginBottom:16,alignItems:'flex-start'}}>
+                <div key={b.id} style={{display:'flex',gap:13,alignItems:'flex-start',marginBottom:14,cursor:'pointer'}} onClick={()=>setDetailBook(b)}>
                   {b.cover_url
-                    ? <img src={b.cover_url} alt={b.title} style={{width:40,height:58,objectFit:'cover',borderRadius:1,boxShadow:'1px 1px 4px rgba(59,47,47,0.2)',flexShrink:0}} onError={e=>e.target.style.display='none'} />
-                    : <div style={{width:40,height:58,background:'linear-gradient(135deg,#a07850,#c9a87a)',borderRadius:1,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.2rem'}}>📖</div>}
+                    ? <img src={b.cover_url} alt={b.title} style={{width:44,height:62,objectFit:'cover',borderRadius:7,boxShadow:'1px 2px 8px rgba(28,43,26,0.14)',flexShrink:0}} onError={e=>e.target.style.display='none'} />
+                    : <div style={{width:44,height:62,background:'linear-gradient(145deg,var(--sage),var(--sage-dark))',borderRadius:7,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.2rem'}}>📖</div>}
                   <div>
-                    <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1rem',fontWeight:600}}>{b.title}</div>
-                    {b.author && <div style={{fontSize:'0.82rem',color:'#8a6a50',fontStyle:'italic'}}>by {b.author}</div>}
-                    {b.format && <div style={{marginTop:6}}><span className="tag format">{b.format}</span></div>}
+                    <div style={{fontFamily:"'Fraunces',serif",fontSize:'0.98rem',fontWeight:700,color:'var(--ink)',lineHeight:1.3}}>{b.title}</div>
+                    {b.author && <div style={{fontSize:'0.78rem',color:'var(--mid)',marginTop:2,fontWeight:500}}>by {b.author}</div>}
+                    {b.format && <div style={{marginTop:7}}><span className="tag t-format">{b.format}</span></div>}
                   </div>
                 </div>
               ))}
             </div>
           )}
+
           <div className="card">
-            <div className="section-title">By Format</div>
+            <div className="section-label">By Format</div>
             {FORMATS.map(fmt=>{
               const count=books.filter(b=>b.format===fmt).length;
               const pct=books.length?Math.round((count/books.length)*100):0;
               return (
-                <div key={fmt} style={{marginBottom:14}}>
-                  <div style={{display:'flex',justifyContent:'space-between',fontSize:'0.85rem',marginBottom:4}}>
-                    <span>{fmt}</span><span style={{color:'#a07850'}}>{count} book{count!==1?'s':''}</span>
-                  </div>
-                  <div className="progress-bar-wrap"><div className="progress-bar" style={{width:`${pct}%`}} /></div>
+                <div key={fmt} className="bar-row">
+                  <div className="bar-label-row"><span>{fmt}</span><span className="bar-count">{count}</span></div>
+                  <div className="bar-track"><div className="bar-fill" style={{width:`${pct}%`}} /></div>
                 </div>
               );
             })}
-            {books.length===0 && <div className="empty" style={{padding:'16px 0'}}>No books yet.</div>}
+            {books.length===0 && <div style={{color:'var(--mid)',fontSize:'0.85rem',fontStyle:'italic'}}>No books yet.</div>}
           </div>
         </>}
 
       </div>
     </div>
 
+    {/* BOOK DETAIL SHEET */}
+    <BookDetailSheet book={detailBook} onClose={()=>setDetailBook(null)} onEdit={editBook} />
+
     {/* LOG MODAL */}
     {logModal && (
       <div className="modal-overlay" onClick={()=>setLogModal(null)}>
         <div className="modal" onClick={e=>e.stopPropagation()}>
+          <div className="modal-handle"/>
           <div className="modal-title">Did you read on {logModal}?</div>
-          <div className="log-book-list">
-            <div className={`log-option ${logBook===''?'selected':''}`} onClick={()=>setLogBook('')} style={{color:'#8a6a50',fontStyle:'italic'}}>
-              <span>✗</span> No reading today
-            </div>
-            {books.map(b=>(
-              <div key={b.id} className={`log-option ${logBook===b.id?'selected':''}`} onClick={()=>setLogBook(b.id)}>
-                {b.cover_url
-                  ? <img src={b.cover_url} alt={b.title} className="log-option-cover" onError={e=>e.target.style.display='none'} />
-                  : <span>📖</span>}
-                <div>
-                  <div style={{fontWeight:500}}>{b.title}</div>
-                  {b.author && <div style={{fontSize:'0.75rem',opacity:0.7}}>by {b.author}</div>}
-                </div>
-              </div>
-            ))}
+          <div className={`log-option ${logBook===''?'selected':''}`} onClick={()=>setLogBook('')}>
+            <span style={{fontSize:'1.1rem'}}>✕</span>
+            <div><div className="log-option-text">No reading today</div></div>
           </div>
-          <div style={{display:'flex',gap:10}}>
-            <button className="btn" onClick={saveLog} disabled={saving}>{saving?'Saving…':'Save'}</button>
-            <button className="btn secondary" onClick={()=>setLogModal(null)}>Cancel</button>
+          {books.map(b=>(
+            <div key={b.id} className={`log-option ${logBook===b.id?'selected':''}`} onClick={()=>setLogBook(b.id)}>
+              {b.cover_url
+                ? <img src={b.cover_url} alt={b.title} className="log-option-cover" onError={e=>e.target.style.display='none'} />
+                : <span style={{fontSize:'1.1rem'}}>📖</span>}
+              <div>
+                <div className="log-option-text">{b.title}</div>
+                {b.author && <div className="log-option-sub">by {b.author}</div>}
+              </div>
+            </div>
+          ))}
+          <div className="btn-row" style={{marginTop:18}}>
+            <button className="btn-primary" onClick={saveLog} disabled={saving}>{saving?'Saving…':'Save'}</button>
+            <button className="btn-secondary" onClick={()=>setLogModal(null)}>Cancel</button>
           </div>
         </div>
       </div>
