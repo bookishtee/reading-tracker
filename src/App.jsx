@@ -146,6 +146,13 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
   background: var(--sage); border-radius: 20px; padding: 4px 12px;
   font-size: 0.7rem; font-weight: 600; color: var(--ink-soft);
 }
+.refresh-btn {
+  background: var(--sage-light); border: none; border-radius: 50%;
+  width: 34px; height: 34px; font-size: 1.2rem; color: var(--ink-soft);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; font-weight: 700;
+}
+.refresh-btn:hover { background: var(--sage); transform: rotate(90deg); }
 .header-greeting-label {
   font-size: 0.75rem; font-weight: 600; color: var(--mid);
   letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 4px;
@@ -907,6 +914,7 @@ export default function App() {
             <div className="header-logo-text">Bookish<span>Tee</span></div>
           </div>
           {saving && <div className="sync-pill">Syncing…</div>}
+          {!saving && <button className="refresh-btn" onClick={loadData} title="Refresh">↻</button>}
         </div>
         <div className="header-greeting" style={{marginBottom:16}}>
           <div className="header-greeting-label">Welcome back</div>
