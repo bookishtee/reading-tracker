@@ -50,6 +50,8 @@ async function searchGoogleBooks(query) {
       const cover_url = cover
         ? cover.replace('http://', 'https://').replace('zoom=1', 'zoom=2')
         : null;
+      const rawDesc = info.description || '';
+      const cleanDesc = rawDesc.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
       return {
         title: info.title || '',
         author: info.authors ? info.authors[0] : '',
@@ -57,7 +59,7 @@ async function searchGoogleBooks(query) {
         pages: info.pageCount || '',
         cover_url,
         genre: info.categories ? info.categories[0] : '',
-        synopsis: info.description ? info.description.slice(0,600) + (info.description.length > 600 ? '…' : '') : '',
+        synopsis: cleanDesc.slice(0,600) + (cleanDesc.length > 600 ? '…' : ''),
         gb_id: item.id || '',
       };
     });
@@ -70,7 +72,9 @@ async function fetchBookDetails(gbId) {
     const res = await fetch(`https://www.googleapis.com/books/v1/volumes/${gbId}`);
     const data = await res.json();
     const desc = data.volumeInfo?.description || '';
-    return desc.slice(0, 600) + (desc.length > 600 ? '…' : '');
+    // Strip HTML tags
+    const clean = desc.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    return clean.slice(0, 600) + (clean.length > 600 ? '…' : '');
   } catch { return ''; }
 }
 
