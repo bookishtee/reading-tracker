@@ -552,6 +552,40 @@ const today = new Date();
 const todayStr = today.toISOString().slice(0,10);
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const CURRENT_YEAR = today.getFullYear();
+
+const QUOTES = [
+  '"A reader lives a thousand lives before he dies." — George R.R. Martin',
+  '"Not all those who wander are lost." — J.R.R. Tolkien',
+  '"So many books, so little time." — Frank Zappa',
+  '"One must always be careful of books." — Cassandra Clare',
+  '"There is no friend as loyal as a book." — Ernest Hemingway',
+  '"Books are a uniquely portable magic." — Stephen King',
+  '"Reading is dreaming with open eyes." — Anissa Trisdiani',
+  '"A book is a dream you hold in your hands." — Neil Gaiman',
+  '"She is too fond of books, and it has turned her brain." — Louisa May Alcott',
+  '"I am not afraid of storms, for I am learning to sail my ship." — Louisa May Alcott',
+  '"It is our choices that show what we truly are." — J.K. Rowling',
+  '"Words are, in my not-so-humble opinion, our most inexhaustible source of magic." — J.K. Rowling',
+  '"The world is a book, and those who do not travel read only one page." — Saint Augustine',
+  '"Literature is the most agreeable way of ignoring life." — Fernando Pessoa',
+  '"Reading is to the mind what exercise is to the body." — Joseph Addison',
+  '"Once you learn to read, you will be forever free." — Frederick Douglass',
+  '"There are worse crimes than burning books. One of them is not reading them." — Joseph Brodsky',
+  '"You can never get a cup of tea large enough or a book long enough to suit me." — C.S. Lewis',
+  '"I kept always two books in my pocket: one to read, one to write in." — Robert Louis Stevenson',
+  '"Books are mirrors: we only see in them what we already have inside us." — Carlos Ruiz Zafón',
+  '"Reading gives us someplace to go when we have to stay where we are." — Mason Cooley',
+  '"The more that you read, the more things you will know." — Dr. Seuss',
+  '"If you only read the books that everyone else is reading, you can only think what everyone else is thinking." — Haruki Murakami',
+  '"A room without books is like a body without a soul." — Marcus Tullius Cicero',
+  '"Think before you speak. Read before you think." — Fran Lebowitz',
+  '"Books are the plane, and the train, and the road. They are the destination, and the journey." — Anna Quindlen',
+  '"You don\'t have to burn books to destroy a culture. Just get people to stop reading them." — Ray Bradbury',
+  '"I find television very educating. Every time somebody turns on the set, I go in the other room and read a book." — Groucho Marx',
+  '"Classic — a book which people praise and don\'t read." — Mark Twain',
+  '"Sleep is good, he said, and books are better." — George R.R. Martin',
+  '"A book must be the axe for the frozen sea within us." — Franz Kafka',
+];
 const emptyForm = { title:'',author:'',genre:'',format:'',status:'Want to Read',start_date:'',end_date:'',total_pages:'',rating:0,notes:'',cover_url:'',gb_id:'' };
 
 // Icon — daughter's illustration hosted in the repo's public folder
@@ -773,7 +807,7 @@ function GoalBanner({ books, goalYear, onSetGoal }) {
 }
 
 export default function App() {
-  const [tab, setTab] = useState('shelf');
+  const [tab, setTab] = useState('home');
   const [books, setBooks] = useState([]);
   const [logMap, setLogMap] = useState({});
   const [form, setForm] = useState(emptyForm);
@@ -858,7 +892,7 @@ export default function App() {
 
   function editBook(b) {
     setForm({...b, total_pages:b.total_pages||'', start_date:b.start_date||'', end_date:b.end_date||'', cover_url:b.cover_url||'', gb_id:b.gb_id||''});
-    setEditId(b.id); setMode('form'); setTab('shelf');
+    setEditId(b.id); setMode('form'); setTab('library');
   }
 
   function openLog(dateStr) { setLogBook(logMap[dateStr]?.book_id||''); setLogModal(dateStr); }
@@ -925,8 +959,11 @@ export default function App() {
 
       {/* NAV */}
       <nav className="nav">
-        <button className={`nav-btn ${tab==='shelf'?'active':''}`} onClick={()=>setTab('shelf')}>
-          <span className="nav-icon">📚</span>Shelf
+        <button className={`nav-btn ${tab==='home'?'active':''}`} onClick={()=>setTab('home')}>
+          <span className="nav-icon">🏠</span>Home
+        </button>
+        <button className={`nav-btn ${tab==='library'?'active':''}`} onClick={()=>setTab('library')}>
+          <span className="nav-icon">📚</span>Library
         </button>
         <button className={`nav-btn ${tab==='log'?'active':''}`} onClick={()=>setTab('log')}>
           <span className="nav-icon">📅</span>Log
@@ -938,11 +975,84 @@ export default function App() {
 
       <div className="container">
 
-        {/* ── SHELF ── */}
-        {tab==='shelf' && <>
+        {/* ── HOME ── */}
+        {tab==='home' && <>
+          <div style={{paddingBottom:8}}>
+            <div className="header-greeting-label" style={{marginBottom:4}}>Welcome back</div>
+            <div className="header-greeting-title" style={{fontSize:'1.6rem',marginBottom:20}}>Your Reading <em>Life</em></div>
+          </div>
+
+          {/* Daily Quote */}
+          <div className="card" style={{marginBottom:14,background:'var(--ink)',border:'none'}}>
+            <div style={{fontSize:'0.65rem',fontWeight:800,letterSpacing:'0.12em',textTransform:'uppercase',color:'var(--sage)',marginBottom:8}}>✨ Daily Inspiration</div>
+            <div style={{fontFamily:"'Fraunces',serif",fontSize:'1rem',fontStyle:'italic',color:'var(--white)',lineHeight:1.6}}>
+              {QUOTES[new Date().getDate() % QUOTES.length]}
+            </div>
+          </div>
+
+          {/* Goal Progress */}
+          <GoalBanner books={books} goalYear={goalYear} onSetGoal={handleSetGoal} />
+
+          {/* Currently Reading */}
+          <div style={{fontFamily:"'Fraunces',serif",fontSize:'1.2rem',fontWeight:700,color:'var(--ink)',marginBottom:12}}>
+            Currently Reading
+          </div>
+          {currentlyReading.length===0 ? (
+            <div className="card" style={{textAlign:'center',padding:'32px 20px'}}>
+              <div style={{fontSize:'2rem',marginBottom:10}}>📖</div>
+              <div style={{fontFamily:"'Fraunces',serif",fontSize:'1rem',color:'var(--ink-soft)',fontWeight:600}}>Nothing in progress</div>
+              <div style={{fontSize:'0.82rem',color:'var(--mid)',marginTop:6,marginBottom:16}}>Head to Library to start a book!</div>
+              <button className="btn-primary" style={{fontSize:'0.8rem',padding:'9px 18px'}} onClick={()=>setTab('library')}>Go to Library →</button>
+            </div>
+          ) : (
+            currentlyReading.map(b=>(
+              <div key={b.id} className="book-item" style={{cursor:'pointer'}} onClick={()=>setDetailBook(b)}>
+                {b.cover_url
+                  ? <img src={b.cover_url} alt={b.title} className="book-cover" onError={e=>e.target.style.display='none'} />
+                  : <div className="book-cover-ph">📖</div>}
+                <div className="book-info">
+                  <div className="book-title">{b.title}</div>
+                  {b.author && <div className="book-author">by {b.author}</div>}
+                  <div className="book-meta">
+                    {b.format && <span className="tag t-format">{b.format}</span>}
+                    {b.genre && <span className="tag">{b.genre}</span>}
+                  </div>
+                  {b.total_pages && <div className="book-date">{b.total_pages} pages</div>}
+                </div>
+                <div style={{fontSize:'1.3rem',color:'var(--mid)',alignSelf:'center'}}>›</div>
+              </div>
+            ))
+          )}
+
+          {/* Want to Read next */}
+          {books.filter(b=>b.status==='Want to Read').length > 0 && <>
+            <div style={{fontFamily:"'Fraunces',serif",fontSize:'1.2rem',fontWeight:700,color:'var(--ink)',marginBottom:12,marginTop:8}}>
+              Up Next
+            </div>
+            {books.filter(b=>b.status==='Want to Read').slice(0,3).map(b=>(
+              <div key={b.id} className="book-item" style={{cursor:'pointer'}} onClick={()=>setDetailBook(b)}>
+                {b.cover_url
+                  ? <img src={b.cover_url} alt={b.title} className="book-cover" onError={e=>e.target.style.display='none'} />
+                  : <div className="book-cover-ph">📖</div>}
+                <div className="book-info">
+                  <div className="book-title">{b.title}</div>
+                  {b.author && <div className="book-author">by {b.author}</div>}
+                  <div className="book-meta">
+                    <span className="tag t-want">Want to Read</span>
+                    {b.genre && <span className="tag">{b.genre}</span>}
+                  </div>
+                </div>
+                <div style={{fontSize:'1.3rem',color:'var(--mid)',alignSelf:'center'}}>›</div>
+              </div>
+            ))}
+          </>}
+        </>}
+
+        {/* ── LIBRARY ── */}
+        {tab==='library' && <>
           <div className="page-header">
             <div>
-              <div className="page-title">My Shelf</div>
+              <div className="page-title">My Library</div>
               {books.length > 0 && <div className="page-count">{books.length} book{books.length!==1?'s':''}</div>}
             </div>
             {mode==='list' && <button className="btn-add" onClick={startAdd}>+ Add Book</button>}
