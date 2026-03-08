@@ -227,10 +227,10 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
   font-family: 'Nunito', sans-serif; font-size: 0.7rem; font-weight: 700;
   padding: 6px 4px; cursor: pointer;
   transition: all 0.2s;
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
   border-radius: 16px;
 }
-.nav-btn .nav-icon { font-size: 1.3rem; line-height: 1; }
+.nav-btn svg { transition: stroke 0.2s; }
 .nav-btn.active {
   color: #451952;
   background: #F5EEF0;
@@ -988,16 +988,28 @@ export default function App() {
       {/* NAV */}
       <nav className="nav">
         <button className={`nav-btn ${tab==='home'?'active':''}`} onClick={()=>setTab('home')}>
-          <span className="nav-icon">🏠</span>Home
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/>
+          </svg>
+          Home
         </button>
         <button className={`nav-btn ${tab==='library'?'active':''}`} onClick={()=>setTab('library')}>
-          <span className="nav-icon">📚</span>Library
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+          </svg>
+          Library
         </button>
         <button className={`nav-btn ${tab==='log'?'active':''}`} onClick={()=>setTab('log')}>
-          <span className="nav-icon">📅</span>Log
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Log
         </button>
         <button className={`nav-btn ${tab==='stats'?'active':''}`} onClick={()=>setTab('stats')}>
-          <span className="nav-icon">📊</span>Stats
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+          Stats
         </button>
       </nav>
 
