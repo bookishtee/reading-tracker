@@ -612,24 +612,30 @@ function BookSearch({ onSelect }) {
   const [q, setQ] = useState('');
   const [results, setResults] = useState(null);
   const [busy, setBusy] = useState(false);
-  async function go() {
-    if (!q.trim()) return;
-    setBusy(true);
-    try { setResults(await searchGoogleBooks(q)); }
-    catch { setResults([]); }
-    setBusy(false);
-  }
+
+  useEffect(() => {
+    if (!q.trim() || q.trim().length < 2) { setResults(null); return; }
+    const timer = setTimeout(async () => {
+      setBusy(true);
+      try { setResults(await searchGoogleBooks(q)); }
+      catch { setResults([]); }
+      setBusy(false);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [q]);
+
   return (
     <div>
       <div className="form-label" style={{marginBottom:8}}>Search by title or author</div>
-      <div className="search-row">
+      <div style={{position:'relative'}}>
         <input className="form-input" value={q} onChange={e=>setQ(e.target.value)}
-          onKeyDown={e=>e.key==='Enter'&&go()} placeholder="e.g. Beloved, Toni Morrison…" autoComplete="off" />
-        <button className="search-go" onClick={go} disabled={busy}>{busy?'Searching…':'Search'}</button>
+          placeholder="Start typing a title or author…" autoComplete="off" autoFocus
+          style={{paddingRight: busy ? 40 : 14}} />
+        {busy && <div style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',fontSize:'0.75rem',color:'var(--mid)'}}>⏳</div>}
       </div>
       {results !== null && (
         <div className="results-list">
-          {results.length===0 && <div className="no-results">No results — try a different search.</div>}
+          {results.length===0 && !busy && <div className="no-results">No results — try a different search.</div>}
           {results.map((r,i)=>(
             <div key={i} className="result-row" onClick={()=>onSelect(r)}>
               {r.cover_url
@@ -830,6 +836,8 @@ export default function App() {
     const saved = localStorage.getItem('bookishtee_goal');
     return saved ? parseInt(saved) : null;
   });
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [filterGenre, setFilterGenre] = useState('All');
 
   function showToast(msg) { setToast(msg); setTimeout(()=>setToast(''),2500); }
 
@@ -920,6 +928,26 @@ export default function App() {
   const currentlyReading = books.filter(b=>b.status==='Reading');
   function stTag(s){if(s==='Reading')return 't-reading';if(s==='Finished')return 't-done';return 't-want';}
 
+  // Reading streak
+  const readingStreak = (() => {
+    let streak = 0;
+    const check = new Date(today);
+    while (true) {
+      const key = check.toISOString().slice(0,10);
+      if (logMap[key]) { streak++; check.setDate(check.getDate()-1); }
+      else break;
+    }
+    return streak;
+  })();
+
+  // Library filters
+  const allGenres = ['All', ...Array.from(new Set(books.map(b=>b.genre).filter(Boolean))).sort()];
+  const filteredBooks = books.filter(b => {
+    const statusOk = filterStatus === 'All' || b.status === filterStatus;
+    const genreOk = filterGenre === 'All' || b.genre === filterGenre;
+    return statusOk && genreOk;
+  });
+
   if(loading) return (
     <><style>{FONTS}{STYLES}</style>
     <div className="app">
@@ -985,6 +1013,19 @@ export default function App() {
           {/* Goal Progress */}
           <GoalBanner books={books} goalYear={goalYear} onSetGoal={handleSetGoal} />
 
+          {/* Streak */}
+          <div className="card" style={{marginBottom:14,display:'flex',alignItems:'center',gap:16,padding:'14px 18px'}}>
+            <div style={{fontSize:'2.2rem',lineHeight:1}}>🔥</div>
+            <div>
+              <div style={{fontFamily:"'Fraunces',serif",fontSize:'1.5rem',fontWeight:700,color:'var(--ink)',lineHeight:1}}>
+                {readingStreak} <span style={{fontSize:'0.9rem',fontWeight:600,color:'var(--mid)'}}>day{readingStreak!==1?'s':''}</span>
+              </div>
+              <div style={{fontSize:'0.75rem',color:'var(--mid)',fontWeight:600,marginTop:2}}>
+                {readingStreak===0 ? 'Log today to start your streak!' : readingStreak===1 ? 'Streak started — keep it up!' : 'Reading streak 🎉'}
+              </div>
+            </div>
+          </div>
+
           {/* Currently Reading */}
           <div style={{fontFamily:"'Fraunces',serif",fontSize:'1.2rem',fontWeight:700,color:'var(--ink)',marginBottom:12}}>
             Currently Reading
@@ -1045,10 +1086,40 @@ export default function App() {
           <div className="page-header">
             <div>
               <div className="page-title">My Library</div>
-              {books.length > 0 && <div className="page-count">{books.length} book{books.length!==1?'s':''}</div>}
+              {books.length > 0 && <div className="page-count">{filteredBooks.length} of {books.length} book{books.length!==1?'s':''}</div>}
             </div>
             {mode==='list' && <button className="btn-add" onClick={startAdd}>+ Add Book</button>}
           </div>
+
+          {/* Filters */}
+          {mode==='list' && books.length > 0 && (
+            <div style={{marginBottom:14}}>
+              <div style={{display:'flex',gap:6,overflowX:'auto',paddingBottom:4}}>
+                {['All','Reading','Finished','Want to Read'].map(s=>(
+                  <button key={s} onClick={()=>setFilterStatus(s)}
+                    style={{flexShrink:0,padding:'6px 14px',borderRadius:20,border:'1.5px solid',fontSize:'0.75rem',fontWeight:700,cursor:'pointer',transition:'all 0.15s',
+                      background: filterStatus===s ? 'var(--sage-dark)' : 'var(--white)',
+                      borderColor: filterStatus===s ? 'var(--sage-dark)' : 'var(--border)',
+                      color: filterStatus===s ? '#E8BCB9' : 'var(--mid)'}}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+              {allGenres.length > 2 && (
+                <div style={{display:'flex',gap:6,overflowX:'auto',paddingBottom:4,marginTop:6}}>
+                  {allGenres.map(g=>(
+                    <button key={g} onClick={()=>setFilterGenre(g)}
+                      style={{flexShrink:0,padding:'5px 12px',borderRadius:20,border:'1.5px solid',fontSize:'0.72rem',fontWeight:700,cursor:'pointer',transition:'all 0.15s',
+                        background: filterGenre===g ? 'var(--ink)' : 'var(--white)',
+                        borderColor: filterGenre===g ? 'var(--ink)' : 'var(--border)',
+                        color: filterGenre===g ? '#E8BCB9' : 'var(--mid)'}}>
+                      {g}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {mode==='search' && (
             <div className="card" style={{marginBottom:16}}>
@@ -1114,7 +1185,15 @@ export default function App() {
             </div>
           )}
 
-          {mode==='list' && books.map(b=>(
+          {mode==='list' && books.length > 0 && filteredBooks.length === 0 && (
+            <div className="empty">
+              <div className="empty-icon">🔍</div>
+              <div className="empty-title">No matches</div>
+              <div className="empty-sub">Try a different filter.</div>
+            </div>
+          )}
+
+          {mode==='list' && filteredBooks.map(b=>(
             <div key={b.id} className="book-item">
               <div className="book-cover-wrap" onClick={()=>setDetailBook(b)}>
                 {b.cover_url
