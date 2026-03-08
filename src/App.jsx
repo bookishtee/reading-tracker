@@ -130,15 +130,15 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 18px; position: relative;
 }
-.header-logo { display: flex; align-items: center; gap: 10px; }
+.header-logo { display: flex; align-items: center; gap: 12px; }
 .header-logo-icon {
-  width: 40px; height: 40px; border-radius: 12px;
+  width: 52px; height: 52px; border-radius: 14px;
   overflow: hidden; flex-shrink: 0;
   box-shadow: 0 2px 10px rgba(28,43,26,0.18);
 }
 .header-logo-icon img { width: 100%; height: 100%; object-fit: cover; }
 .header-logo-text {
-  font-family: 'Fraunces', serif; font-size: 1.15rem; font-weight: 700;
+  font-family: 'Fraunces', serif; font-size: 1.45rem; font-weight: 700;
   color: var(--ink); letter-spacing: -0.01em;
 }
 .header-logo-text span { color: var(--sage-dark); }
