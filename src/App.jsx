@@ -105,7 +105,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 /* HEADER */
 .header {
   background: var(--sage-pale);
-  padding: 52px 22px 36px;
+  padding: 48px 22px 16px;
   position: relative;
   overflow: hidden;
 }
@@ -216,26 +216,25 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 /* NAV */
 .nav {
   display: flex; justify-content: space-around;
-  background: var(--white); border-bottom: 1px solid var(--border);
-  padding: 0 10px; position: sticky; top: 0; z-index: 50;
-  box-shadow: 0 1px 8px rgba(28,43,26,0.06);
+  background: var(--white); border-top: 1px solid var(--border);
+  padding: 6px 10px 16px;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  z-index: 50;
+  box-shadow: 0 -2px 16px rgba(28,43,26,0.08);
 }
 .nav-btn {
   flex: 1; background: none; border: none; color: var(--mid);
-  font-family: 'Nunito', sans-serif; font-size: 0.78rem; font-weight: 700;
-  letter-spacing: 0.04em; padding: 14px 6px 12px; cursor: pointer;
+  font-family: 'Nunito', sans-serif; font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.02em; padding: 6px 6px 2px; cursor: pointer;
   transition: color 0.2s; position: relative;
   display: flex; flex-direction: column; align-items: center; gap: 3px;
 }
-.nav-btn .nav-icon { font-size: 1.1rem; }
-.nav-btn.active { color: var(--ink); }
-.nav-btn.active::after {
-  content: ''; position: absolute; bottom: 0; left: 20%; right: 20%;
-  height: 3px; background: var(--sage-dark); border-radius: 3px 3px 0 0;
-}
+.nav-btn .nav-icon { font-size: 1.3rem; }
+.nav-btn.active { color: var(--sage-dark); }
+.nav-btn.active::after { display: none; }
 
 /* CONTAINER */
-.container { max-width: 640px; margin: 0 auto; padding: 22px 16px 80px; }
+.container { max-width: 640px; margin: 0 auto; padding: 12px 16px 100px; }
 
 /* CARDS */
 .card {
@@ -950,11 +949,6 @@ export default function App() {
           {saving && <div className="sync-pill">Syncing…</div>}
           {!saving && <button className="refresh-btn" onClick={loadData} title="Refresh">↻</button>}
         </div>
-        <div className="header-greeting" style={{marginBottom:16}}>
-          <div className="header-greeting-label">Welcome back</div>
-          <div className="header-greeting-title">Your Reading <em>Life</em></div>
-        </div>
-        <GoalBanner books={books} goalYear={goalYear} onSetGoal={handleSetGoal} />
       </div>
 
       {/* NAV */}
@@ -977,7 +971,7 @@ export default function App() {
 
         {/* ── HOME ── */}
         {tab==='home' && <>
-          <div style={{paddingBottom:8}}>
+          <div style={{paddingBottom:8,paddingTop:4}}>
             <div className="header-greeting-label" style={{marginBottom:4}}>Welcome back</div>
             <div className="header-greeting-title" style={{fontSize:'1.6rem',marginBottom:20}}>Your Reading <em>Life</em></div>
           </div>
@@ -1201,24 +1195,6 @@ export default function App() {
             <div className="stat-card"><div className="stat-num">{finishedThisYear}</div><div className="stat-lbl">{CURRENT_YEAR}</div></div>
             <div className="stat-card"><div className="stat-num">{Object.keys(logMap).length}</div><div className="stat-lbl">Days Read</div></div>
           </div>
-
-          {currentlyReading.length>0 && (
-            <div className="card" style={{marginBottom:14}}>
-              <div className="section-label">Currently Reading</div>
-              {currentlyReading.map(b=>(
-                <div key={b.id} style={{display:'flex',gap:13,alignItems:'flex-start',marginBottom:14,cursor:'pointer'}} onClick={()=>setDetailBook(b)}>
-                  {b.cover_url
-                    ? <img src={b.cover_url} alt={b.title} style={{width:44,height:62,objectFit:'cover',borderRadius:7,boxShadow:'1px 2px 8px rgba(28,43,26,0.14)',flexShrink:0}} onError={e=>e.target.style.display='none'} />
-                    : <div style={{width:44,height:62,background:'linear-gradient(145deg,var(--sage),var(--sage-dark))',borderRadius:7,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.2rem'}}>📖</div>}
-                  <div>
-                    <div style={{fontFamily:"'Fraunces',serif",fontSize:'0.98rem',fontWeight:700,color:'var(--ink)',lineHeight:1.3}}>{b.title}</div>
-                    {b.author && <div style={{fontSize:'0.78rem',color:'var(--mid)',marginTop:2,fontWeight:500}}>by {b.author}</div>}
-                    {b.format && <div style={{marginTop:7}}><span className="tag t-format">{b.format}</span></div>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
 
           <div className="card">
             <div className="section-label">By Format</div>
