@@ -105,7 +105,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 /* HEADER */
 .header {
   background: var(--sage-pale);
-  padding: 48px 22px 16px;
+  padding: 62px 22px 16px;
   position: relative;
   overflow: hidden;
 }
@@ -130,15 +130,15 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 18px; position: relative;
 }
-.header-logo { display: flex; align-items: center; gap: 12px; }
+.header-logo { display: flex; align-items: center; gap: 14px; }
 .header-logo-icon {
-  width: 52px; height: 52px; border-radius: 14px;
+  width: 64px; height: 64px; border-radius: 16px;
   overflow: hidden; flex-shrink: 0;
   box-shadow: 0 2px 10px rgba(28,43,26,0.18);
 }
 .header-logo-icon img { width: 100%; height: 100%; object-fit: cover; }
 .header-logo-text {
-  font-family: 'Fraunces', serif; font-size: 1.45rem; font-weight: 700;
+  font-family: 'Fraunces', serif; font-size: 1.8rem; font-weight: 700;
   color: var(--ink); letter-spacing: -0.01em;
 }
 .header-logo-text span { color: var(--sage-dark); }
@@ -974,14 +974,6 @@ export default function App() {
           <div style={{paddingBottom:8,paddingTop:4}}>
             <div className="header-greeting-label" style={{marginBottom:4}}>Welcome back</div>
             <div className="header-greeting-title" style={{fontSize:'1.6rem',marginBottom:20}}>Your Reading <em>Life</em></div>
-          </div>
-
-          {/* Daily Quote */}
-          <div className="card" style={{marginBottom:14,background:'var(--ink)',border:'none'}}>
-            <div style={{fontSize:'0.65rem',fontWeight:800,letterSpacing:'0.12em',textTransform:'uppercase',color:'var(--sage)',marginBottom:8}}>✨ Daily Inspiration</div>
-            <div style={{fontFamily:"'Fraunces',serif",fontSize:'1rem',fontStyle:'italic',color:'var(--white)',lineHeight:1.6}}>
-              {QUOTES[new Date().getDate() % QUOTES.length]}
-            </div>
           </div>
 
           {/* Goal Progress */}
