@@ -165,7 +165,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 
 /* GOAL BANNER in header */
 .goal-banner {
-  margin-top: 18px; background: var(--white);
+  margin-top: 8px; margin-bottom: 20px; background: var(--white);
   border-radius: 16px; padding: 14px 16px;
   box-shadow: var(--card-shadow); position: relative;
 }
