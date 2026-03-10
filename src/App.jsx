@@ -1317,7 +1317,12 @@ export default function App() {
             <span style={{fontSize:'1.1rem'}}>✕</span>
             <div><div className="log-option-text">No reading today</div></div>
           </div>
-          {books.map(b=>(
+          {currentlyReading.length === 0 && (
+            <div style={{textAlign:'center',padding:'16px 0',color:'var(--mid)',fontSize:'0.85rem',fontStyle:'italic'}}>
+              No books in progress — mark a book as "Reading" in your Library first.
+            </div>
+          )}
+          {currentlyReading.map(b=>(
             <div key={b.id} className={`log-option ${logBook===b.id?'selected':''}`} onClick={()=>setLogBook(b.id)}>
               {b.cover_url
                 ? <img src={b.cover_url} alt={b.title} className="log-option-cover" onError={e=>e.target.style.display='none'} />
