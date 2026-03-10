@@ -955,7 +955,6 @@ export default function App() {
         <div className="header-blob-1"/><div className="header-blob-2"/>
         <div className="header-top">
           <div className="header-logo">
-            <div className="header-logo-icon"><img src={ICON_URL} alt="BookishTee" onError={e=>{e.target.style.display='none';e.target.parentNode.textContent='📚';}}/></div>
             <div className="header-logo-text">Bookish<span>Tee</span></div>
           </div>
         </div>
@@ -974,10 +973,6 @@ export default function App() {
         <div className="header-wave"/>
         <div className="header-top">
           <div className="header-logo">
-            <div className="header-logo-icon">
-              <img src={ICON_URL} alt="BookishTee"
-                onError={e=>{e.target.style.display='none';e.target.parentNode.style.background='var(--ink)';e.target.parentNode.textContent='📚';}}/>
-            </div>
             <div className="header-logo-text">Bookish<span>Tee</span></div>
           </div>
           {saving && <div className="sync-pill">Syncing…</div>}
