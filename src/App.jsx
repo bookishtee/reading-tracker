@@ -295,6 +295,8 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 }
 .btn-ghost:hover { background: var(--sage-pale); color: var(--ink); }
 .btn-ghost.danger:hover { background: #FDE8E8; color: #C0392B; }
+.btn-ghost.finish { color: #451952; }
+.btn-ghost.finish:hover { background: #EDE0F0; color: #451952; }
 .btn-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
 
 /* FORMS */
@@ -825,7 +827,7 @@ export default function App() {
   const [editId, setEditId] = useState(null);
   const [mode, setMode] = useState('list');
   const [logModal, setLogModal] = useState(null);
-  const [logBook, setLogBook] = useState('');
+  const [logBook, setLogBook] = useState([]);
   const [calMonth, setCalMonth] = useState(today.getMonth());
   const [calYear, setCalYear] = useState(today.getFullYear());
   const [loading, setLoading] = useState(true);
@@ -856,7 +858,10 @@ export default function App() {
       ]);
       setBooks(Array.isArray(b)?b:[]);
       const lm={};
-      if(Array.isArray(l)) l.forEach(x=>{lm[x.log_date]=x;});
+      if(Array.isArray(l)) l.forEach(x=>{
+        if(!lm[x.log_date]) lm[x.log_date]=[];
+        lm[x.log_date].push(x);
+      });
       setLogMap(lm);
     } catch { showToast('Could not reach cloud.'); }
     setLoading(false);
@@ -895,6 +900,15 @@ export default function App() {
     setSaving(false);
   }
 
+  async function markFinished(b) {
+    setSaving(true);
+    const endDate = today.toISOString().slice(0,10);
+    await sbUpdate('books', b.id, { status: 'Finished', end_date: endDate });
+    showToast(`"${b.title}" marked as finished 🎉`);
+    await loadData();
+    setSaving(false);
+  }
+
   async function deleteBook(id) {
     setSaving(true);
     await sbDelete('books',id);
@@ -908,14 +922,27 @@ export default function App() {
     setEditId(b.id); setMode('form'); setTab('library');
   }
 
-  function openLog(dateStr) { setLogBook(logMap[dateStr]?.book_id||''); setLogModal(dateStr); }
+  function openLog(dateStr) {
+    const existing = logMap[dateStr] || [];
+    setLogBook(existing.map(e => e.book_id).filter(Boolean));
+    setLogModal(dateStr);
+  }
 
   async function saveLog() {
     if(!logModal) return;
     setSaving(true);
     try {
-      if(logBook){await sbUpsert('reading_log',{log_date:logModal,book_id:logBook},'log_date');showToast('Reading logged ✓');}
-      else{await sbDeleteWhere('reading_log','log_date',logModal);showToast('Log cleared');}
+      // Delete all existing entries for this date
+      await sbDeleteWhere('reading_log','log_date',logModal);
+      // Insert new entries
+      if(logBook.length > 0) {
+        for(const bookId of logBook) {
+          await sbInsert('reading_log',{log_date:logModal, book_id:bookId});
+        }
+        showToast('Reading logged ✓');
+      } else {
+        showToast('Log cleared');
+      }
       await loadData();
     } catch { showToast('Error saving log.'); }
     setSaving(false); setLogModal(null);
@@ -1224,6 +1251,9 @@ export default function App() {
                 {b.notes && <div className="book-notes">"{b.notes}"</div>}
               </div>
               <div className="book-actions">
+                {b.status==='Reading' && (
+                  <button className="btn-ghost finish" onClick={()=>markFinished(b)}>✓ Finished</button>
+                )}
                 <button className="btn-ghost" onClick={()=>editBook(b)}>Edit</button>
                 <button className="btn-ghost danger" onClick={()=>deleteBook(b.id)}>✕</button>
               </div>
@@ -1247,19 +1277,19 @@ export default function App() {
               {Array.from({length:daysInMonth}).map((_,i)=>{
                 const day=i+1;
                 const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                const entry=logMap[dateStr];
+                const entries=logMap[dateStr]||[];
+                const hasLog=entries.length>0;
                 const isToday=dateStr===todayStr;
-                const bookTitle=entry?.book_id?books.find(b=>b.id===entry.book_id)?.title:null;
+                const count=entries.length;
                 return (
-                  <div key={day} className={`log-day ${entry?'read':''} ${isToday?'today':''}`} onClick={()=>openLog(dateStr)}>
+                  <div key={day} className={`log-day ${hasLog?'read':''} ${isToday?'today':''}`} onClick={()=>openLog(dateStr)}>
                     <span className="log-day-num">{day}</span>
-                    {bookTitle && <span className="log-book-label">{bookTitle.length>8?bookTitle.slice(0,7)+'…':bookTitle}</span>}
-                    {entry&&!bookTitle && <span className="log-book-label">✓</span>}
+                    {hasLog && <span className="log-book-label">{count>1?`${count} books`:'✓'}</span>}
                   </div>
                 );
               })}
             </div>
-            <div className="log-hint">Tap any day to mark it. Green = read that day.</div>
+            <div className="log-hint">Tap any day to mark it. Purple = read that day.</div>
           </div>
         )}
 
@@ -1307,8 +1337,9 @@ export default function App() {
       <div className="modal-overlay" onClick={()=>setLogModal(null)}>
         <div className="modal" onClick={e=>e.stopPropagation()}>
           <div className="modal-handle"/>
-          <div className="modal-title">Did you read on {logModal}?</div>
-          <div className={`log-option ${logBook===''?'selected':''}`} onClick={()=>setLogBook('')}>
+          <div className="modal-title">What did you read on {logModal}?</div>
+          <div style={{fontSize:'0.75rem',color:'var(--mid)',marginBottom:12,textAlign:'center'}}>Tap to select — you can pick more than one</div>
+          <div className={`log-option ${logBook.length===0?'selected':''}`} onClick={()=>setLogBook([])}>
             <span style={{fontSize:'1.1rem'}}>✕</span>
             <div><div className="log-option-text">No reading today</div></div>
           </div>
@@ -1317,17 +1348,23 @@ export default function App() {
               No books in progress — mark a book as "Reading" in your Library first.
             </div>
           )}
-          {currentlyReading.map(b=>(
-            <div key={b.id} className={`log-option ${logBook===b.id?'selected':''}`} onClick={()=>setLogBook(b.id)}>
-              {b.cover_url
-                ? <img src={b.cover_url} alt={b.title} className="log-option-cover" onError={e=>e.target.style.display='none'} />
-                : <span style={{fontSize:'1.1rem'}}>📖</span>}
-              <div>
-                <div className="log-option-text">{b.title}</div>
-                {b.author && <div className="log-option-sub">by {b.author}</div>}
+          {currentlyReading.map(b=>{
+            const selected = logBook.includes(b.id);
+            return (
+              <div key={b.id} className={`log-option ${selected?'selected':''}`}
+                onClick={()=>setLogBook(prev => selected ? prev.filter(id=>id!==b.id) : [...prev, b.id])}>
+                {b.cover_url
+                  ? <img src={b.cover_url} alt={b.title} className="log-option-cover" onError={e=>e.target.style.display='none'} />
+                  : <span style={{fontSize:'1.1rem'}}>📖</span>}
+                <div style={{flex:1}}>
+                  <div className="log-option-text">{b.title}</div>
+                  {b.author && <div className="log-option-sub">by {b.author}</div>}
+                  {b.format && <div className="log-option-sub">{b.format}</div>}
+                </div>
+                {selected && <span style={{fontSize:'1.1rem',marginLeft:'auto'}}>✓</span>}
               </div>
-            </div>
-          ))}
+            );
+          })}
           <div className="btn-row" style={{marginTop:18}}>
             <button className="btn-primary" onClick={saveLog} disabled={saving}>{saving?'Saving…':'Save'}</button>
             <button className="btn-secondary" onClick={()=>setLogModal(null)}>Cancel</button>
