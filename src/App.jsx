@@ -955,10 +955,14 @@ export default function App() {
   const currentlyReading = books.filter(b=>b.status==='Reading');
   function stTag(s){if(s==='Reading')return 't-reading';if(s==='Finished')return 't-done';return 't-want';}
 
-  // Reading streak
+  // Reading streak — counts back from yesterday so today's log is optional
   const readingStreak = (() => {
     let streak = 0;
     const check = new Date(today);
+    // If today is already logged, count it and go back from there
+    // If not, start checking from yesterday
+    const todayKey = check.toISOString().slice(0,10);
+    if (!logMap[todayKey]) check.setDate(check.getDate()-1);
     while (true) {
       const key = check.toISOString().slice(0,10);
       if (logMap[key]) { streak++; check.setDate(check.getDate()-1); }
@@ -1055,7 +1059,7 @@ export default function App() {
                 {readingStreak} <span style={{fontSize:'0.9rem',fontWeight:600,color:'var(--mid)'}}>day{readingStreak!==1?'s':''}</span>
               </div>
               <div style={{fontSize:'0.75rem',color:'var(--mid)',fontWeight:600,marginTop:2}}>
-                {readingStreak===0 ? 'Log today to start your streak!' : readingStreak===1 ? 'Streak started — keep it up!' : 'Reading streak 🎉'}
+                {readingStreak===0 ? 'Log a day to start your streak!' : readingStreak===1 ? 'Streak started — keep it going!' : 'Reading streak 🎉'}
               </div>
             </div>
           </div>
