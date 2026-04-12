@@ -1211,27 +1211,27 @@ export default function App() {
             });
             const todayLogged = !!logMap[todayStr];
             return (
-              <div className="card" style={{marginBottom:14,background:'var(--ink)',border:'none',padding:'16px 18px'}}>
-                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
-                  <div style={{fontFamily:"'Fraunces',serif",fontSize:'1.3rem',fontWeight:700,color:'#E8BCB9'}}>
+              <div className="card" style={{marginBottom:14,background:'var(--ink)',border:'none',padding:'10px 14px'}}>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+                  <div style={{fontFamily:"'Fraunces',serif",fontSize:'1rem',fontWeight:700,color:'#E8BCB9'}}>
                     🔥 {readingStreak} day{readingStreak!==1?'s':''} streak
                   </div>
                 </div>
-                <div style={{display:'flex',gap:6,marginBottom:14}}>
+                <div style={{display:'flex',gap:4,marginBottom:10}}>
                   {days.map((dateStr,i)=>{
                     const logged = !!logMap[dateStr];
                     const isToday = dateStr===todayStr;
                     return (
-                      <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
-                        <div style={{fontSize:'0.6rem',fontWeight:800,color: logged?'#F39F5A':'rgba(232,188,185,0.4)',letterSpacing:'0.05em'}}>
+                      <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
+                        <div style={{fontSize:'0.55rem',fontWeight:800,color: logged?'#F39F5A':'rgba(232,188,185,0.4)',letterSpacing:'0.05em'}}>
                           {dayLabels[i]}
                         </div>
                         <div style={{
-                          width:28,height:28,borderRadius:'50%',
+                          width:22,height:22,borderRadius:'50%',
                           background: logged ? '#F39F5A' : 'rgba(255,255,255,0.08)',
                           border: isToday ? '2px solid #F39F5A' : '2px solid transparent',
                           display:'flex',alignItems:'center',justifyContent:'center',
-                          fontSize:'0.65rem',fontWeight:800,
+                          fontSize:'0.55rem',fontWeight:800,
                           color: logged ? '#1D1A39' : 'rgba(232,188,185,0.3)'
                         }}>
                           {logged ? '✓' : ''}
@@ -1244,8 +1244,8 @@ export default function App() {
                   style={{background: todayLogged ? 'rgba(243,159,90,0.2)' : '#F39F5A',
                     color: todayLogged ? '#F39F5A' : '#1D1A39',
                     border: todayLogged ? '1.5px solid #F39F5A' : 'none',
-                    borderRadius:20,padding:'8px 18px',fontFamily:"'Nunito',sans-serif",
-                    fontSize:'0.8rem',fontWeight:800,cursor:'pointer'}}>
+                    borderRadius:20,padding:'6px 14px',fontFamily:"'Nunito',sans-serif",
+                    fontSize:'0.75rem',fontWeight:800,cursor:'pointer'}}>
                   {todayLogged ? '✓ Logged today' : 'I read today'}
                 </button>
               </div>
@@ -1290,28 +1290,6 @@ export default function App() {
             </div>
           )}
 
-          {/* Want to Read next */}
-          {books.filter(b=>b.status==='Want to Read').length > 0 && <>
-            <div style={{fontFamily:"'Fraunces',serif",fontSize:'1.2rem',fontWeight:700,color:'var(--ink)',marginBottom:12,marginTop:8}}>
-              Up Next
-            </div>
-            {books.filter(b=>b.status==='Want to Read').slice(0,3).map(b=>(
-              <div key={b.id} className="book-item" style={{cursor:'pointer'}} onClick={()=>setDetailBook(b)}>
-                {b.cover_url
-                  ? <img src={b.cover_url} alt={b.title} className="book-cover" onError={e=>e.target.style.display='none'} />
-                  : <div className="book-cover-ph">📖</div>}
-                <div className="book-info">
-                  <div className="book-title">{b.title}</div>
-                  {b.author && <div className="book-author">by {b.author}</div>}
-                  <div className="book-meta">
-                    <span className="tag t-want">Want to Read</span>
-                    {b.genre && <span className="tag">{b.genre}</span>}
-                  </div>
-                </div>
-                <div style={{fontSize:'1.3rem',color:'var(--mid)',alignSelf:'center'}}>›</div>
-              </div>
-            ))}
-          </>}
         </>}
 
         {/* ── LIBRARY ── */}
