@@ -14,6 +14,24 @@ async function sbGet(table, query="") {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, { headers });
   return res.json();
 }
+
+async function sbGetAll(table, query="") {
+  let all = [];
+  let from = 0;
+  const pageSize = 1000;
+  while (true) {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/${table}?${query}`,
+      { headers: { ...headers, "Range-Unit": "items", "Range": `${from}-${from + pageSize - 1}` } }
+    );
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) break;
+    all = all.concat(data);
+    if (data.length < pageSize) break;
+    from += pageSize;
+  }
+  return all;
+}
 async function sbInsert(table, body) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, { method:"POST", headers, body:JSON.stringify(body) });
   return res.json();
@@ -68,7 +86,23 @@ async function searchGoogleBooks(query) {
   } catch { return []; }
 }
 
-async function fetchBookDetails(gbId) {
+async function fetchCoverByTitle(title, author) {
+  try {
+    const q = encodeURIComponent(`${title} ${author||''}`);
+    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=1&printType=books&key=${GOOGLE_BOOKS_KEY}`);
+    const data = await res.json();
+    if (!data.items || !data.items[0]) return null;
+    const info = data.items[0].volumeInfo || {};
+    const cover = info.imageLinks
+      ? (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail || null)
+      : null;
+    const gbId = data.items[0].id || null;
+    return {
+      cover_url: cover ? cover.replace('http://', 'https://').replace('zoom=1', 'zoom=2') : null,
+      gb_id: gbId
+    };
+  } catch { return null; }
+}
   if (!gbId) return '';
   try {
     const res = await fetch(`https://www.googleapis.com/books/v1/volumes/${gbId}?key=${GOOGLE_BOOKS_KEY}`);
@@ -840,6 +874,7 @@ export default function App() {
   });
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterGenre, setFilterGenre] = useState('All');
+  const [filterYear, setFilterYear] = useState('All');
 
   function showToast(msg) { setToast(msg); setTimeout(()=>setToast(''),2500); }
 
@@ -853,8 +888,8 @@ export default function App() {
     setLoading(true);
     try {
       const [b,l] = await Promise.all([
-        sbGet('books','order=created_at.asc'),
-        sbGet('reading_log','order=log_date.asc')
+        sbGetAll('books','order=created_at.asc'),
+        sbGetAll('reading_log','order=log_date.asc')
       ]);
       setBooks(Array.isArray(b)?b:[]);
       const lm={};
@@ -898,6 +933,30 @@ export default function App() {
       setForm(emptyForm); setEditId(null); setMode('list');
     } catch { showToast('Error saving. Try again.'); }
     setSaving(false);
+  }
+
+  const [fetchingCovers, setFetchingCovers] = useState(false);
+  const [coverProgress, setCoverProgress] = useState('');
+
+  async function fetchMissingCovers() {
+    const missing = books.filter(b => !b.cover_url);
+    if (missing.length === 0) { showToast('All books already have covers!'); return; }
+    setFetchingCovers(true);
+    let updated = 0;
+    for (let i = 0; i < missing.length; i++) {
+      const b = missing[i];
+      setCoverProgress(`Fetching covers… ${i+1} of ${missing.length}`);
+      const result = await fetchCoverByTitle(b.title, b.author);
+      if (result && result.cover_url) {
+        await sbUpdate('books', b.id, { cover_url: result.cover_url, gb_id: result.gb_id });
+        updated++;
+      }
+      await new Promise(r => setTimeout(r, 300)); // rate limit
+    }
+    setFetchingCovers(false);
+    setCoverProgress('');
+    showToast(`Updated ${updated} covers ✓`);
+    await loadData();
   }
 
   async function markFinished(b) {
@@ -973,10 +1032,15 @@ export default function App() {
 
   // Library filters
   const allGenres = ['All', ...Array.from(new Set(books.map(b=>b.genre).filter(Boolean))).sort()];
+  const allYears = ['All', ...Array.from(new Set(
+    books.filter(b=>b.end_date).map(b=>b.end_date.slice(0,4))
+  )).sort((a,b)=>b-a)];
+
   const filteredBooks = books.filter(b => {
     const statusOk = filterStatus === 'All' || b.status === filterStatus;
     const genreOk = filterGenre === 'All' || b.genre === filterGenre;
-    return statusOk && genreOk;
+    const yearOk = filterYear === 'All' || (b.end_date && b.end_date.startsWith(filterYear));
+    return statusOk && genreOk && yearOk;
   });
 
   if(loading) return (
@@ -1126,7 +1190,15 @@ export default function App() {
               <div className="page-title">My Library</div>
               {books.length > 0 && <div className="page-count">{filteredBooks.length} of {books.length} book{books.length!==1?'s':''}</div>}
             </div>
-            {mode==='list' && <button className="btn-add" onClick={startAdd}>+ Add Book</button>}
+            <div style={{display:'flex',gap:8,alignItems:'center'}}>
+              {mode==='list' && books.filter(b=>!b.cover_url).length > 0 && (
+                <button className="btn-secondary" style={{fontSize:'0.72rem',padding:'7px 12px',whiteSpace:'nowrap'}}
+                  onClick={fetchMissingCovers} disabled={fetchingCovers}>
+                  {fetchingCovers ? coverProgress : `🖼 Fetch Covers (${books.filter(b=>!b.cover_url).length})`}
+                </button>
+              )}
+              {mode==='list' && <button className="btn-add" onClick={startAdd}>+ Add Book</button>}
+            </div>
           </div>
 
           {/* Filters */}
@@ -1140,6 +1212,17 @@ export default function App() {
                       borderColor: filterStatus===s ? 'var(--sage-dark)' : 'var(--border)',
                       color: filterStatus===s ? '#E8BCB9' : 'var(--mid)'}}>
                     {s}
+                  </button>
+                ))}
+              </div>
+              <div style={{display:'flex',gap:6,overflowX:'auto',paddingBottom:4,marginTop:6}}>
+                {allYears.map(y=>(
+                  <button key={y} onClick={()=>setFilterYear(y)}
+                    style={{flexShrink:0,padding:'5px 12px',borderRadius:20,border:'1.5px solid',fontSize:'0.72rem',fontWeight:700,cursor:'pointer',transition:'all 0.15s',
+                      background: filterYear===y ? '#451952' : 'var(--white)',
+                      borderColor: filterYear===y ? '#451952' : 'var(--border)',
+                      color: filterYear===y ? '#E8BCB9' : 'var(--mid)'}}>
+                    {y}
                   </button>
                 ))}
               </div>
