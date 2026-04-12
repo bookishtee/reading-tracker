@@ -141,7 +141,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 /* HEADER */
 .header {
   background: linear-gradient(135deg, #0D244D 0%, #852E47 60%, #C2441C 100%);
-  padding: 62px 22px 16px;
+  padding: 52px 22px 20px;
   position: relative;
   overflow: hidden;
 }
@@ -1191,11 +1191,6 @@ export default function App() {
 
         {/* ── HOME ── */}
         {tab==='home' && <>
-          <div style={{paddingBottom:8,paddingTop:4}}>
-            <div className="header-greeting-label" style={{marginBottom:4}}>Welcome back</div>
-            <div className="header-greeting-title" style={{fontSize:'1.6rem',marginBottom:20}}>Your Reading <em>Life</em></div>
-          </div>
-
           {/* Goal Progress */}
           <GoalBanner books={books} goalYear={goalYear} onSetGoal={handleSetGoal} />
 
@@ -1223,16 +1218,16 @@ export default function App() {
                     const isToday = dateStr===todayStr;
                     return (
                       <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
-                        <div style={{fontSize:'0.55rem',fontWeight:800,color: logged?'#AA542B':'rgba(194,68,28,0.3)',letterSpacing:'0.05em'}}>
+                        <div style={{fontSize:'0.55rem',fontWeight:800,color: logged?'#AA542B':'rgba(245,237,232,0.6)',letterSpacing:'0.05em'}}>
                           {dayLabels[i]}
                         </div>
                         <div style={{
                           width:22,height:22,borderRadius:'50%',
-                          background: logged ? '#AA542B' : 'rgba(255,255,255,0.08)',
-                          border: isToday ? '2px solid #AA542B' : '2px solid transparent',
+                          background: logged ? '#AA542B' : 'rgba(245,237,232,0.15)',
+                          border: isToday ? '2px solid #AA542B' : '2px solid rgba(245,237,232,0.3)',
                           display:'flex',alignItems:'center',justifyContent:'center',
                           fontSize:'0.55rem',fontWeight:800,
-                          color: logged ? '#F5EDE8' : 'rgba(194,68,28,0.2)'
+                          color: logged ? '#F5EDE8' : 'rgba(245,237,232,0.4)'
                         }}>
                           {logged ? '✓' : ''}
                         </div>
@@ -1246,7 +1241,7 @@ export default function App() {
                     border: todayLogged ? '1.5px solid #AA542B' : 'none',
                     borderRadius:20,padding:'6px 14px',fontFamily:"'Nunito',sans-serif",
                     fontSize:'0.75rem',fontWeight:800,cursor:'pointer'}}>
-                  {todayLogged ? '✓ Logged today' : 'I read today'}
+                  {todayLogged ? '✓ I read today' : 'I read today'}
                 </button>
               </div>
             );
