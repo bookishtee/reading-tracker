@@ -103,6 +103,8 @@ async function fetchCoverByTitle(title, author) {
     };
   } catch { return null; }
 }
+
+async function fetchBookDetails(gbId) {
   if (!gbId) return '';
   try {
     const res = await fetch(`https://www.googleapis.com/books/v1/volumes/${gbId}?key=${GOOGLE_BOOKS_KEY}`);
