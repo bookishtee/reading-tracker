@@ -119,20 +119,20 @@ const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Nunito:ital
 
 const STYLES = `
 :root {
-  --sage: #AE445A;
-  --sage-light: #C4768A;
-  --sage-pale: #F5EEF0;
-  --sage-dark: #451952;
-  --bg: #F2E8EC;
+  --sage: #AA542B;
+  --sage-light: #C4763D;
+  --sage-pale: #F5EDE8;
+  --sage-dark: #0D244D;
+  --bg: #F2EDE8;
   --white: #FFFFFF;
-  --ink: #1D1A39;
-  --ink-soft: #451952;
-  --mid: #662549;
-  --accent: #F39F5A;
-  --accent-light: #FDEFD8;
-  --border: #E8D0D8;
-  --card-shadow: 0 2px 16px rgba(29,26,57,0.10);
-  --goal-green: #F39F5A;
+  --ink: #0D244D;
+  --ink-soft: #852E47;
+  --mid: #AA542B;
+  --accent: #C2441C;
+  --accent-light: #F5E8E4;
+  --border: #E0CFC8;
+  --card-shadow: 0 2px 16px rgba(13,36,77,0.10);
+  --goal-green: #AA542B;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
 body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--ink); }
@@ -140,7 +140,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 
 /* HEADER */
 .header {
-  background: linear-gradient(135deg, #1D1A39 0%, #451952 60%, #662549 100%);
+  background: linear-gradient(135deg, #0D244D 0%, #852E47 60%, #C2441C 100%);
   padding: 62px 22px 16px;
   position: relative;
   overflow: hidden;
@@ -154,12 +154,12 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 }
 .header-blob-1 {
   position: absolute; width: 140px; height: 140px;
-  border-radius: 50%; background: #F39F5A; opacity: 0.15;
+  border-radius: 50%; background: #AA542B; opacity: 0.2;
   top: -40px; right: -30px;
 }
 .header-blob-2 {
   position: absolute; width: 80px; height: 80px;
-  border-radius: 50%; background: #AE445A; opacity: 0.25;
+  border-radius: 50%; background: #852E47; opacity: 0.25;
   bottom: 10px; left: -20px;
 }
 .header-top {
@@ -175,29 +175,29 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 .header-logo-icon img { width: 100%; height: 100%; object-fit: cover; }
 .header-logo-text {
   font-family: 'Fraunces', serif; font-size: 1.8rem; font-weight: 700;
-  color: #E8BCB9; letter-spacing: -0.01em;
+  color: #F5EDE8; letter-spacing: -0.01em;
 }
-.header-logo-text span { color: #F39F5A; }
+.header-logo-text span { color: #AA542B; }
 .sync-pill {
   background: rgba(255,255,255,0.15); border-radius: 20px; padding: 4px 12px;
-  font-size: 0.7rem; font-weight: 600; color: #E8BCB9;
+  font-size: 0.7rem; font-weight: 600; color: #F5EDE8;
 }
 .refresh-btn {
   background: rgba(255,255,255,0.15); border: none; border-radius: 50%;
-  width: 34px; height: 34px; font-size: 1.2rem; color: #E8BCB9;
+  width: 34px; height: 34px; font-size: 1.2rem; color: #F5EDE8;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: all 0.2s; font-weight: 700;
 }
 .refresh-btn:hover { background: rgba(255,255,255,0.25); transform: rotate(90deg); }
 .header-greeting-label {
-  font-size: 0.75rem; font-weight: 600; color: #F39F5A;
+  font-size: 0.75rem; font-weight: 600; color: #AA542B;
   letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 4px;
 }
 .header-greeting-title {
   font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700;
-  color: #E8BCB9; line-height: 1.1;
+  color: #F5EDE8; line-height: 1.1;
 }
-.header-greeting-title em { font-style: italic; color: #F39F5A; }
+.header-greeting-title em { font-style: italic; color: #AA542B; }
 
 /* GOAL BANNER in header */
 .goal-banner {
@@ -222,10 +222,10 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 }
 .goal-fill {
   height: 100%; border-radius: 10px;
-  background: linear-gradient(90deg, #1D1A39, #AE445A, #F39F5A);
+  background: linear-gradient(90deg, #0D244D, #852E47, #C2441C);
   transition: width 0.5s ease;
 }
-.goal-fill.complete { background: linear-gradient(90deg, #F39F5A, #AE445A); }
+.goal-fill.complete { background: linear-gradient(90deg, #AA542B, #C2441C); }
 .goal-edit-btn {
   background: var(--sage-pale);
   border: 1.5px solid var(--border);
@@ -256,7 +256,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
   padding: 8px 12px 16px;
   position: fixed; bottom: 0; left: 0; right: 0;
   z-index: 50;
-  box-shadow: 0 -2px 16px rgba(29,26,57,0.08);
+  box-shadow: 0 -2px 16px rgba(13,36,77,0.08);
 }
 .nav-btn {
   flex: 1; background: none; border: none; color: var(--mid);
@@ -268,8 +268,8 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 }
 .nav-btn svg { transition: stroke 0.2s; }
 .nav-btn.active {
-  color: #451952;
-  background: #F5EEF0;
+  color: #852E47;
+  background: #F5EDE8;
   border-radius: 16px;
   padding: 6px 10px;
 }
@@ -300,20 +300,20 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 
 /* BUTTONS */
 .btn-add {
-  background: var(--ink); color: #E8BCB9; border: none; border-radius: 14px;
+  background: #0D244D; color: #F5EDE8; border: none; border-radius: 14px;
   padding: 11px 20px; font-family: 'Nunito', sans-serif; font-size: 0.85rem;
   font-weight: 800; cursor: pointer; transition: all 0.2s;
   display: inline-flex; align-items: center; gap: 5px;
 }
-.btn-add:hover { background: var(--sage-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(29,26,57,0.2); }
+.btn-add:hover { background: #852E47; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(13,36,77,0.2); }
 .btn-add:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
 .btn-primary {
-  background: var(--sage-dark); color: #E8BCB9; border: none; border-radius: 14px;
+  background: #0D244D; color: #F5EDE8; border: none; border-radius: 14px;
   padding: 12px 22px; font-family: 'Nunito', sans-serif;
   font-size: 0.85rem; font-weight: 800; cursor: pointer; transition: all 0.2s;
 }
-.btn-primary:hover { background: var(--ink); }
+.btn-primary:hover { background: #852E47; }
 .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .btn-secondary {
@@ -331,8 +331,8 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 }
 .btn-ghost:hover { background: var(--sage-pale); color: var(--ink); }
 .btn-ghost.danger:hover { background: #FDE8E8; color: #C0392B; }
-.btn-ghost.finish { color: #451952; }
-.btn-ghost.finish:hover { background: #EDE0F0; color: #451952; }
+.btn-ghost.finish { color: #852E47; }
+.btn-ghost.finish:hover { background: #F5EDE8; color: #852E47; }
 .btn-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
 
 /* FORMS */
@@ -437,9 +437,9 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
   font-size: 0.68rem; font-weight: 700; color: var(--mid); letter-spacing: 0.02em;
 }
 .tag.t-format { background: var(--ink); color: var(--white); }
-.tag.t-reading { background: #F5EEF0; color: #662549; }
-.tag.t-done { background: #EDE0F0; color: #451952; }
-.tag.t-want { background: var(--accent-light); color: #B06820; }
+.tag.t-reading { background: #EAF0F5; color: #0D244D; }
+.tag.t-done { background: #F5EDE8; color: #852E47; }
+.tag.t-want { background: #F5EAE8; color: #C2441C; }
 .book-stars { display: flex; gap: 1px; }
 .book-star { font-size: 0.82rem; color: var(--border); }
 .book-star.lit { color: var(--accent); }
@@ -476,9 +476,9 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
   gap: 1px; border: 1.5px solid transparent; font-weight: 600;
 }
 .log-day:hover { border-color: var(--sage-dark); background: var(--sage-pale); }
-.log-day.read { background: linear-gradient(135deg, #451952, #AE445A); color: #E8BCB9; border-color: #451952; }
+.log-day.read { background: linear-gradient(135deg, #0D244D, #852E47); color: #F5EDE8; border-color: #0D244D; }
 .log-day.today { border-color: var(--accent); }
-.log-day.read.today { border-color: var(--ink); }
+.log-day.read.today { border-color: #AA542B; }
 .log-day-num { font-weight: 800; font-size: 0.82rem; }
 .log-book-label { font-size: 0.5rem; opacity: 0.85; text-align: center; line-height: 1.1; }
 .log-hint { margin-top: 14px; font-size: 0.75rem; color: var(--mid); text-align: center; font-weight: 600; }
@@ -486,16 +486,16 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 /* STATS */
 .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 11px; margin-bottom: 16px; }
 .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 16px 12px; text-align: center; box-shadow: var(--card-shadow); }
-.stat-card.accent { background: linear-gradient(135deg, #1D1A39, #451952); border-color: #451952; }
+.stat-card.accent { background: linear-gradient(135deg, #0D244D, #852E47); border-color: #0D244D; }
 .stat-num { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; color: var(--ink); line-height: 1; }
-.stat-card.accent .stat-num { color: #E8BCB9; }
+.stat-card.accent .stat-num { color: #F5EDE8; }
 .stat-lbl { font-size: 0.64rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-top: 5px; }
 .stat-card.accent .stat-lbl { color: rgba(255,255,255,0.65); }
 .bar-row { margin-bottom: 15px; }
 .bar-label-row { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 7px; color: var(--ink-soft); }
 .bar-count { color: var(--accent); font-weight: 800; }
 .bar-track { background: var(--bg); border-radius: 6px; height: 6px; overflow: hidden; }
-.bar-fill { height: 100%; background: linear-gradient(90deg, #451952, #AE445A); border-radius: 6px; transition: width 0.4s; }
+.bar-fill { height: 100%; background: linear-gradient(90deg, #0D244D, #852E47); border-radius: 6px; transition: width 0.4s; }
 
 /* GOAL SETTINGS card */
 .goal-input-row { display: flex; gap: 10px; align-items: center; }
@@ -1115,11 +1115,11 @@ export default function App() {
       {/* FLOATING ADD BOOK PILL */}
       <button onClick={()=>{startAdd();setTab('library');}}
         style={{position:'fixed',bottom:82,left:'50%',transform:'translateX(-50%)',
-          background:'linear-gradient(135deg,#451952,#AE445A)',
-          color:'#E8BCB9',border:'none',borderRadius:30,
+          background:'linear-gradient(135deg,#0D244D,#852E47)',
+          color:'#F5EDE8',border:'none',borderRadius:30,
           padding:'12px 24px',fontFamily:"'Nunito',sans-serif",
           fontSize:'0.85rem',fontWeight:800,cursor:'pointer',
-          boxShadow:'0 4px 20px rgba(69,25,82,0.4)',
+          boxShadow:'0 4px 20px rgba(13,36,77,0.4)',
           zIndex:49,display:'flex',alignItems:'center',gap:8,
           whiteSpace:'nowrap'}}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -1213,7 +1213,7 @@ export default function App() {
             return (
               <div className="card" style={{marginBottom:14,background:'var(--ink)',border:'none',padding:'10px 14px'}}>
                 <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
-                  <div style={{fontFamily:"'Fraunces',serif",fontSize:'1rem',fontWeight:700,color:'#E8BCB9'}}>
+                  <div style={{fontFamily:"'Fraunces',serif",fontSize:'1rem',fontWeight:700,color:'#F5EDE8'}}>
                     🔥 {readingStreak} day{readingStreak!==1?'s':''} streak
                   </div>
                 </div>
@@ -1223,16 +1223,16 @@ export default function App() {
                     const isToday = dateStr===todayStr;
                     return (
                       <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
-                        <div style={{fontSize:'0.55rem',fontWeight:800,color: logged?'#F39F5A':'rgba(232,188,185,0.4)',letterSpacing:'0.05em'}}>
+                        <div style={{fontSize:'0.55rem',fontWeight:800,color: logged?'#AA542B':'rgba(194,68,28,0.3)',letterSpacing:'0.05em'}}>
                           {dayLabels[i]}
                         </div>
                         <div style={{
                           width:22,height:22,borderRadius:'50%',
-                          background: logged ? '#F39F5A' : 'rgba(255,255,255,0.08)',
-                          border: isToday ? '2px solid #F39F5A' : '2px solid transparent',
+                          background: logged ? '#AA542B' : 'rgba(255,255,255,0.08)',
+                          border: isToday ? '2px solid #AA542B' : '2px solid transparent',
                           display:'flex',alignItems:'center',justifyContent:'center',
                           fontSize:'0.55rem',fontWeight:800,
-                          color: logged ? '#1D1A39' : 'rgba(232,188,185,0.3)'
+                          color: logged ? '#F5EDE8' : 'rgba(194,68,28,0.2)'
                         }}>
                           {logged ? '✓' : ''}
                         </div>
@@ -1241,9 +1241,9 @@ export default function App() {
                   })}
                 </div>
                 <button onClick={()=>setTab('log')}
-                  style={{background: todayLogged ? 'rgba(243,159,90,0.2)' : '#F39F5A',
-                    color: todayLogged ? '#F39F5A' : '#1D1A39',
-                    border: todayLogged ? '1.5px solid #F39F5A' : 'none',
+                  style={{background: todayLogged ? 'rgba(170,84,43,0.2)' : '#AA542B',
+                    color: todayLogged ? '#AA542B' : '#F5EDE8',
+                    border: todayLogged ? '1.5px solid #AA542B' : 'none',
                     borderRadius:20,padding:'6px 14px',fontFamily:"'Nunito',sans-serif",
                     fontSize:'0.75rem',fontWeight:800,cursor:'pointer'}}>
                   {todayLogged ? '✓ Logged today' : 'I read today'}
@@ -1272,12 +1272,12 @@ export default function App() {
                   {b.cover_url
                     ? <img src={b.cover_url} alt={b.title}
                         style={{width:130,height:190,objectFit:'cover',borderRadius:12,
-                          boxShadow:'0 4px 16px rgba(29,26,57,0.18)'}}
+                          boxShadow:'0 4px 16px rgba(13,36,77,0.18)'}}
                         onError={e=>e.target.style.display='none'} />
                     : <div style={{width:130,height:190,borderRadius:12,
-                        background:'linear-gradient(135deg,#451952,#AE445A)',
+                        background:'linear-gradient(135deg,#0D244D,#852E47)',
                         display:'flex',alignItems:'center',justifyContent:'center',fontSize:'2.5rem',
-                        boxShadow:'0 4px 16px rgba(29,26,57,0.18)'}}>📖</div>}
+                        boxShadow:'0 4px 16px rgba(13,36,77,0.18)'}}>📖</div>}
                   <div style={{marginTop:8,fontFamily:"'Fraunces',serif",fontSize:'0.82rem',
                     fontWeight:700,color:'var(--ink)',lineHeight:1.3,
                     overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,
@@ -1371,7 +1371,7 @@ export default function App() {
                       }}
                         style={{marginTop:8,padding:'5px 12px',borderRadius:10,border:'1.5px solid var(--border)',
                           fontSize:'0.72rem',fontWeight:700,cursor:'pointer',background:'var(--white)',
-                          color:'#451952',fontFamily:"'Nunito',sans-serif"}}>
+                          color:'#852E47',fontFamily:"'Nunito',sans-serif"}}>
                         🔍 Find Cover
                       </button>
                     )}
