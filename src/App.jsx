@@ -877,6 +877,7 @@ export default function App() {
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterGenre, setFilterGenre] = useState('All');
   const [filterYear, setFilterYear] = useState('All');
+  const [librarySearch, setLibrarySearch] = useState('');
 
   function showToast(msg) { setToast(msg); setTimeout(()=>setToast(''),2500); }
 
@@ -1091,6 +1092,12 @@ export default function App() {
           </svg>
           Library
         </button>
+        <button className={`nav-btn ${tab==='search'?'active':''}`} onClick={()=>{setTab('search');setLibrarySearch('');}}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          Search
+        </button>
         <button className={`nav-btn ${tab==='log'?'active':''}`} onClick={()=>setTab('log')}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
@@ -1105,7 +1112,82 @@ export default function App() {
         </button>
       </nav>
 
+      {/* FLOATING ADD BOOK PILL */}
+      <button onClick={()=>{startAdd();setTab('library');}}
+        style={{position:'fixed',bottom:82,left:'50%',transform:'translateX(-50%)',
+          background:'linear-gradient(135deg,#451952,#AE445A)',
+          color:'#E8BCB9',border:'none',borderRadius:30,
+          padding:'12px 24px',fontFamily:"'Nunito',sans-serif",
+          fontSize:'0.85rem',fontWeight:800,cursor:'pointer',
+          boxShadow:'0 4px 20px rgba(69,25,82,0.4)',
+          zIndex:49,display:'flex',alignItems:'center',gap:8,
+          whiteSpace:'nowrap'}}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add Book
+      </button>
+
       <div className="container">
+
+        {/* ── SEARCH ── */}
+        {tab==='search' && <>
+          <div className="page-title" style={{marginBottom:14}}>Search Library</div>
+          <div style={{position:'relative',marginBottom:16}}>
+            <svg style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',opacity:0.4}} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input
+              className="form-input"
+              style={{paddingLeft:36}}
+              placeholder="Search by title or author…"
+              value={librarySearch}
+              onChange={e=>setLibrarySearch(e.target.value)}
+              autoFocus
+            />
+            {librarySearch && (
+              <button onClick={()=>setLibrarySearch('')}
+                style={{position:'absolute',right:10,top:'50%',transform:'translateY(-50%)',
+                  background:'none',border:'none',cursor:'pointer',color:'var(--mid)',fontSize:'1rem'}}>✕</button>
+            )}
+          </div>
+          {librarySearch.trim().length < 2 ? (
+            <div style={{textAlign:'center',padding:'40px 20px',color:'var(--mid)'}}>
+              <div style={{fontSize:'2rem',marginBottom:10}}>🔍</div>
+              <div style={{fontFamily:"'Fraunces',serif",fontSize:'1rem',fontWeight:600}}>Start typing to search</div>
+              <div style={{fontSize:'0.8rem',marginTop:6}}>Search across all {books.length} books</div>
+            </div>
+          ) : (() => {
+            const q = librarySearch.trim().toLowerCase();
+            const results = books.filter(b =>
+              b.title?.toLowerCase().includes(q) || b.author?.toLowerCase().includes(q)
+            );
+            return results.length === 0 ? (
+              <div style={{textAlign:'center',padding:'40px 20px',color:'var(--mid)'}}>
+                <div style={{fontSize:'2rem',marginBottom:10}}>😔</div>
+                <div style={{fontFamily:"'Fraunces',serif",fontSize:'1rem',fontWeight:600}}>No results found</div>
+              </div>
+            ) : (
+              <>
+                <div className="page-count" style={{marginBottom:12}}>{results.length} result{results.length!==1?'s':''}</div>
+                {results.map(b=>(
+                  <div key={b.id} className="book-item" style={{cursor:'pointer'}} onClick={()=>setDetailBook(b)}>
+                    {b.cover_url
+                      ? <img src={b.cover_url} alt={b.title} className="book-cover" onError={e=>e.target.style.display='none'} />
+                      : <div className="book-cover-ph">📖</div>}
+                    <div className="book-info">
+                      <div className="book-title">{b.title}</div>
+                      {b.author && <div className="book-author">by {b.author}</div>}
+                      <div className="book-meta">
+                        <span className={`tag ${stTag(b.status)}`}>{b.status}</span>
+                        {b.format && <span className="tag t-format">{b.format}</span>}
+                      </div>
+                      {b.end_date && <div className="book-date">Finished {b.end_date}</div>}
+                    </div>
+                  </div>
+                ))}
+              </>
+            );
+          })()}
+        </>}
 
         {/* ── HOME ── */}
         {tab==='home' && <>
@@ -1117,20 +1199,60 @@ export default function App() {
           {/* Goal Progress */}
           <GoalBanner books={books} goalYear={goalYear} onSetGoal={handleSetGoal} />
 
-          {/* Streak */}
-          <div className="card" style={{marginBottom:14,display:'flex',alignItems:'center',gap:16,padding:'14px 18px'}}>
-            <div style={{fontSize:'2.2rem',lineHeight:1}}>🔥</div>
-            <div>
-              <div style={{fontFamily:"'Fraunces',serif",fontSize:'1.5rem',fontWeight:700,color:'var(--ink)',lineHeight:1}}>
-                {readingStreak} <span style={{fontSize:'0.9rem',fontWeight:600,color:'var(--mid)'}}>day{readingStreak!==1?'s':''}</span>
+          {/* Streak Card — Literal style */}
+          {(() => {
+            const dayLabels = ['S','M','T','W','T','F','S'];
+            const todayDow = today.getDay(); // 0=Sun
+            // Build last 7 days starting from the most recent Sunday
+            const days = Array.from({length:7}, (_,i) => {
+              const d = new Date(today);
+              d.setDate(today.getDate() - todayDow + i);
+              return d.toISOString().slice(0,10);
+            });
+            const todayLogged = !!logMap[todayStr];
+            return (
+              <div className="card" style={{marginBottom:14,background:'var(--ink)',border:'none',padding:'16px 18px'}}>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
+                  <div style={{fontFamily:"'Fraunces',serif",fontSize:'1.3rem',fontWeight:700,color:'#E8BCB9'}}>
+                    🔥 {readingStreak} day{readingStreak!==1?'s':''} streak
+                  </div>
+                </div>
+                <div style={{display:'flex',gap:6,marginBottom:14}}>
+                  {days.map((dateStr,i)=>{
+                    const logged = !!logMap[dateStr];
+                    const isToday = dateStr===todayStr;
+                    return (
+                      <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
+                        <div style={{fontSize:'0.6rem',fontWeight:800,color: logged?'#F39F5A':'rgba(232,188,185,0.4)',letterSpacing:'0.05em'}}>
+                          {dayLabels[i]}
+                        </div>
+                        <div style={{
+                          width:28,height:28,borderRadius:'50%',
+                          background: logged ? '#F39F5A' : 'rgba(255,255,255,0.08)',
+                          border: isToday ? '2px solid #F39F5A' : '2px solid transparent',
+                          display:'flex',alignItems:'center',justifyContent:'center',
+                          fontSize:'0.65rem',fontWeight:800,
+                          color: logged ? '#1D1A39' : 'rgba(232,188,185,0.3)'
+                        }}>
+                          {logged ? '✓' : ''}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button onClick={()=>setTab('log')}
+                  style={{background: todayLogged ? 'rgba(243,159,90,0.2)' : '#F39F5A',
+                    color: todayLogged ? '#F39F5A' : '#1D1A39',
+                    border: todayLogged ? '1.5px solid #F39F5A' : 'none',
+                    borderRadius:20,padding:'8px 18px',fontFamily:"'Nunito',sans-serif",
+                    fontSize:'0.8rem',fontWeight:800,cursor:'pointer'}}>
+                  {todayLogged ? '✓ Logged today' : 'I read today'}
+                </button>
               </div>
-              <div style={{fontSize:'0.75rem',color:'var(--mid)',fontWeight:600,marginTop:2}}>
-                {readingStreak===0 ? 'Log a day to start your streak!' : readingStreak===1 ? 'Streak started — keep it going!' : 'Reading streak 🎉'}
-              </div>
-            </div>
-          </div>
+            );
+          })()}
 
-          {/* Currently Reading */}
+          {/* Currently Reading — horizontal scroll */}
           <div style={{fontFamily:"'Fraunces',serif",fontSize:'1.2rem',fontWeight:700,color:'var(--ink)',marginBottom:12}}>
             Currently Reading
           </div>
@@ -1142,23 +1264,30 @@ export default function App() {
               <button className="btn-primary" style={{fontSize:'0.8rem',padding:'9px 18px'}} onClick={()=>setTab('library')}>Go to Library →</button>
             </div>
           ) : (
-            currentlyReading.map(b=>(
-              <div key={b.id} className="book-item" style={{cursor:'pointer'}} onClick={()=>setDetailBook(b)}>
-                {b.cover_url
-                  ? <img src={b.cover_url} alt={b.title} className="book-cover" onError={e=>e.target.style.display='none'} />
-                  : <div className="book-cover-ph">📖</div>}
-                <div className="book-info">
-                  <div className="book-title">{b.title}</div>
-                  {b.author && <div className="book-author">by {b.author}</div>}
-                  <div className="book-meta">
-                    {b.format && <span className="tag t-format">{b.format}</span>}
-                    {b.genre && <span className="tag">{b.genre}</span>}
-                  </div>
-                  {b.total_pages && <div className="book-date">{b.total_pages} pages</div>}
+            <div style={{display:'flex',gap:12,overflowX:'auto',paddingBottom:8,marginBottom:8,
+              scrollSnapType:'x mandatory',WebkitOverflowScrolling:'touch'}}>
+              {currentlyReading.map(b=>(
+                <div key={b.id} onClick={()=>setDetailBook(b)}
+                  style={{flexShrink:0,width:130,scrollSnapAlign:'start',cursor:'pointer'}}>
+                  {b.cover_url
+                    ? <img src={b.cover_url} alt={b.title}
+                        style={{width:130,height:190,objectFit:'cover',borderRadius:12,
+                          boxShadow:'0 4px 16px rgba(29,26,57,0.18)'}}
+                        onError={e=>e.target.style.display='none'} />
+                    : <div style={{width:130,height:190,borderRadius:12,
+                        background:'linear-gradient(135deg,#451952,#AE445A)',
+                        display:'flex',alignItems:'center',justifyContent:'center',fontSize:'2.5rem',
+                        boxShadow:'0 4px 16px rgba(29,26,57,0.18)'}}>📖</div>}
+                  <div style={{marginTop:8,fontFamily:"'Fraunces',serif",fontSize:'0.82rem',
+                    fontWeight:700,color:'var(--ink)',lineHeight:1.3,
+                    overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,
+                    WebkitBoxOrient:'vertical'}}>{b.title}</div>
+                  {b.author && <div style={{fontSize:'0.7rem',color:'var(--mid)',marginTop:2,
+                    overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+                    {b.author}</div>}
                 </div>
-                <div style={{fontSize:'1.3rem',color:'var(--mid)',alignSelf:'center'}}>›</div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
 
           {/* Want to Read next */}
