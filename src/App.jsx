@@ -1192,54 +1192,41 @@ export default function App() {
               <div className="page-title">My Library</div>
               {books.length > 0 && <div className="page-count">{filteredBooks.length} of {books.length} book{books.length!==1?'s':''}</div>}
             </div>
-            <div style={{display:'flex',gap:8,alignItems:'center'}}>
-              {mode==='list' && books.filter(b=>!b.cover_url).length > 0 && (
-                <button className="btn-secondary" style={{fontSize:'0.72rem',padding:'7px 12px',whiteSpace:'nowrap'}}
-                  onClick={fetchMissingCovers} disabled={fetchingCovers}>
-                  {fetchingCovers ? coverProgress : `🖼 Fetch Covers (${books.filter(b=>!b.cover_url).length})`}
-                </button>
-              )}
-              {mode==='list' && <button className="btn-add" onClick={startAdd}>+ Add Book</button>}
-            </div>
+            {mode==='list' && <button className="btn-add" onClick={startAdd}>+ Add Book</button>}
           </div>
 
           {/* Filters */}
           {mode==='list' && books.length > 0 && (
-            <div style={{marginBottom:14}}>
-              <div style={{display:'flex',gap:6,overflowX:'auto',paddingBottom:4}}>
-                {['All','Reading','Finished','Want to Read'].map(s=>(
-                  <button key={s} onClick={()=>setFilterStatus(s)}
-                    style={{flexShrink:0,padding:'6px 14px',borderRadius:20,border:'1.5px solid',fontSize:'0.75rem',fontWeight:700,cursor:'pointer',transition:'all 0.15s',
-                      background: filterStatus===s ? 'var(--sage-dark)' : 'var(--white)',
-                      borderColor: filterStatus===s ? 'var(--sage-dark)' : 'var(--border)',
-                      color: filterStatus===s ? '#E8BCB9' : 'var(--mid)'}}>
-                    {s}
-                  </button>
+            <div style={{display:'flex',gap:8,marginBottom:14,flexWrap:'wrap'}}>
+              <select value={filterStatus} onChange={e=>setFilterStatus(e.target.value)}
+                style={{flex:1,minWidth:120,padding:'8px 12px',borderRadius:12,border:'1.5px solid var(--border)',
+                  fontSize:'0.78rem',fontWeight:700,color:'var(--ink)',background:'var(--white)',
+                  fontFamily:"'Nunito',sans-serif",cursor:'pointer',appearance:'none',
+                  backgroundImage:`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23662549' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+                  backgroundRepeat:'no-repeat',backgroundPosition:'right 10px center',paddingRight:28}}>
+                <option value="All">All Statuses</option>
+                <option value="Reading">Reading</option>
+                <option value="Finished">Finished</option>
+                <option value="Want to Read">Want to Read</option>
+              </select>
+              <select value={filterYear} onChange={e=>setFilterYear(e.target.value)}
+                style={{flex:1,minWidth:120,padding:'8px 12px',borderRadius:12,border:'1.5px solid var(--border)',
+                  fontSize:'0.78rem',fontWeight:700,color:'var(--ink)',background:'var(--white)',
+                  fontFamily:"'Nunito',sans-serif",cursor:'pointer',appearance:'none',
+                  backgroundImage:`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23662549' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+                  backgroundRepeat:'no-repeat',backgroundPosition:'right 10px center',paddingRight:28}}>
+                <option value="All">All Years</option>
+                {allYears.filter(y=>y!=='All').map(y=>(
+                  <option key={y} value={y}>{y}</option>
                 ))}
-              </div>
-              <div style={{display:'flex',gap:6,overflowX:'auto',paddingBottom:4,marginTop:6}}>
-                {allYears.map(y=>(
-                  <button key={y} onClick={()=>setFilterYear(y)}
-                    style={{flexShrink:0,padding:'5px 12px',borderRadius:20,border:'1.5px solid',fontSize:'0.72rem',fontWeight:700,cursor:'pointer',transition:'all 0.15s',
-                      background: filterYear===y ? '#451952' : 'var(--white)',
-                      borderColor: filterYear===y ? '#451952' : 'var(--border)',
-                      color: filterYear===y ? '#E8BCB9' : 'var(--mid)'}}>
-                    {y}
-                  </button>
-                ))}
-              </div>
-              {allGenres.length > 2 && (
-                <div style={{display:'flex',gap:6,overflowX:'auto',paddingBottom:4,marginTop:6}}>
-                  {allGenres.map(g=>(
-                    <button key={g} onClick={()=>setFilterGenre(g)}
-                      style={{flexShrink:0,padding:'5px 12px',borderRadius:20,border:'1.5px solid',fontSize:'0.72rem',fontWeight:700,cursor:'pointer',transition:'all 0.15s',
-                        background: filterGenre===g ? 'var(--ink)' : 'var(--white)',
-                        borderColor: filterGenre===g ? 'var(--ink)' : 'var(--border)',
-                        color: filterGenre===g ? '#E8BCB9' : 'var(--mid)'}}>
-                      {g}
-                    </button>
-                  ))}
-                </div>
+              </select>
+              {(filterStatus!=='All' || filterYear!=='All' || filterGenre!=='All') && (
+                <button onClick={()=>{setFilterStatus('All');setFilterYear('All');setFilterGenre('All');}}
+                  style={{padding:'8px 14px',borderRadius:12,border:'1.5px solid var(--border)',
+                    fontSize:'0.75rem',fontWeight:700,color:'var(--mid)',background:'var(--white)',
+                    cursor:'pointer',fontFamily:"'Nunito',sans-serif",whiteSpace:'nowrap'}}>
+                  Clear ✕
+                </button>
               )}
             </div>
           )}
@@ -1258,10 +1245,37 @@ export default function App() {
             <div className="card" style={{marginBottom:16}}>
               {(form.cover_url||form.title) && (
                 <div className="form-cover-header">
-                  {form.cover_url && <img src={form.cover_url} alt="cover" className="form-cover-img" onError={e=>e.target.style.display='none'} />}
-                  <div>
+                  {form.cover_url
+                    ? <img src={form.cover_url} alt="cover" className="form-cover-img" onError={e=>e.target.style.display='none'} />
+                    : <div style={{width:52,height:74,borderRadius:8,background:'var(--sage-pale)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.5rem',flexShrink:0}}>📖</div>}
+                  <div style={{flex:1}}>
                     <div className="form-cover-title">{form.title||'New Book'}</div>
                     {form.author && <div className="form-cover-author">by {form.author}</div>}
+                    {form.title && (
+                      <button type="button" onClick={async()=>{
+                        if(!form.title) return;
+                        const result = await fetchCoverByTitle(form.title, form.author);
+                        if(result?.cover_url) {
+                          setForm(f=>({...f, cover_url: result.cover_url, gb_id: result.gb_id||f.gb_id}));
+                          showToast('Cover found ✓');
+                        } else {
+                          showToast('No cover found — try editing the title');
+                        }
+                      }}
+                        style={{marginTop:8,padding:'5px 12px',borderRadius:10,border:'1.5px solid var(--border)',
+                          fontSize:'0.72rem',fontWeight:700,cursor:'pointer',background:'var(--white)',
+                          color:'#451952',fontFamily:"'Nunito',sans-serif"}}>
+                        🔍 Find Cover
+                      </button>
+                    )}
+                    {form.cover_url && (
+                      <button type="button" onClick={()=>setForm(f=>({...f,cover_url:''}))}
+                        style={{marginTop:8,marginLeft:6,padding:'5px 12px',borderRadius:10,border:'1.5px solid var(--border)',
+                          fontSize:'0.72rem',fontWeight:700,cursor:'pointer',background:'var(--white)',
+                          color:'var(--mid)',fontFamily:"'Nunito',sans-serif"}}>
+                        ✕ Remove
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
