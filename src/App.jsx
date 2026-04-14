@@ -592,7 +592,10 @@ const FORMATS = ["📖 Physical","📱 Digital","🎧 Audiobook"];
 const STATUSES = ["Want to Read","Reading","Finished"];
 const GENRES = ["Fiction","Non-Fiction","Literary Fiction","Romance","Mystery","Sci-Fi","Fantasy","Biography","History","Poetry","Other"];
 const today = new Date();
-const todayStr = today.toISOString().slice(0,10);
+function toLocalDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+const todayStr = toLocalDateStr(today);
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const CURRENT_YEAR = today.getFullYear();
 
@@ -964,7 +967,7 @@ export default function App() {
 
   async function markFinished(b) {
     setSaving(true);
-    const endDate = today.toISOString().slice(0,10);
+    const endDate = toLocalDateStr(today);
     await sbUpdate('books', b.id, { status: 'Finished', end_date: endDate });
     showToast(`"${b.title}" marked as finished 🎉`);
     await loadData();
@@ -1023,10 +1026,10 @@ export default function App() {
     const check = new Date(today);
     // If today is already logged, count it and go back from there
     // If not, start checking from yesterday
-    const todayKey = check.toISOString().slice(0,10);
+    const todayKey = toLocalDateStr(check);
     if (!logMap[todayKey]) check.setDate(check.getDate()-1);
     while (true) {
-      const key = check.toISOString().slice(0,10);
+      const key = toLocalDateStr(check);
       if (logMap[key]) { streak++; check.setDate(check.getDate()-1); }
       else break;
     }
@@ -1202,7 +1205,7 @@ export default function App() {
             const days = Array.from({length:7}, (_,i) => {
               const d = new Date(today);
               d.setDate(today.getDate() - todayDow + i);
-              return d.toISOString().slice(0,10);
+              return toLocalDateStr(d);
             });
             const todayLogged = !!logMap[todayStr];
             return (
