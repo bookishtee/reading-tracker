@@ -1464,7 +1464,7 @@ export default function App() {
               </div>
               <div className="book-actions">
                 {b.status==='Reading' && (
-                  <button className="btn-ghost finish" onClick={()=>markFinished(b)}>✓ Finished</button>
+                  <button className="btn-ghost finish" onClick={()=>markFinished(b)}>Mark Finished</button>
                 )}
                 <button className="btn-ghost" onClick={()=>editBook(b)}>Edit</button>
                 <button className="btn-ghost danger" onClick={()=>deleteBook(b.id)}>✕</button>
