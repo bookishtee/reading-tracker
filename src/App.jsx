@@ -1085,121 +1085,116 @@ export default function App() {
         </div>
       </div>
 
+      {/* OVERLAY */}
+      {fabOpen && (
+        <div onClick={()=>setFabOpen(false)}
+          style={{position:'fixed',inset:0,zIndex:48,background:'rgba(13,36,77,0.25)',backdropFilter:'blur(2px)'}}/>
+      )}
+
+      {/* EXPANDED MENU ITEMS — anchored above Home button */}
+      <div style={{position:'fixed',bottom:72,left:0,zIndex:49,
+        display:'flex',flexDirection:'column',alignItems:'flex-start',gap:10,padding:'0 0 0 20px'}}>
+
+        {/* Log Today */}
+        <div style={{
+          transform: fabOpen ? 'translateY(0) scale(1)' : 'translateY(30px) scale(0.85)',
+          opacity: fabOpen ? 1 : 0,
+          transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
+          transitionDelay: fabOpen ? '0.1s' : '0s',
+          pointerEvents: fabOpen ? 'all' : 'none',
+          display:'flex',alignItems:'center',gap:12}}>
+          <button onClick={()=>{setFabOpen(false);setTab('log');}}
+            style={{width:48,height:48,borderRadius:'50%',border:'none',cursor:'pointer',
+              background:'#0D244D',color:'#F5EDE8',flexShrink:0,
+              display:'flex',alignItems:'center',justifyContent:'center',
+              boxShadow:'0 4px 14px rgba(13,36,77,0.4)'}}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </button>
+          <span style={{background:'#0D244D',color:'#F5EDE8',
+            fontSize:'0.78rem',fontWeight:700,padding:'6px 14px',borderRadius:20,
+            fontFamily:"'Nunito',sans-serif",whiteSpace:'nowrap',
+            boxShadow:'0 2px 8px rgba(13,36,77,0.3)'}}>Log Today</span>
+        </div>
+
+        {/* Search */}
+        <div style={{
+          transform: fabOpen ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.85)',
+          opacity: fabOpen ? 1 : 0,
+          transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
+          transitionDelay: fabOpen ? '0.05s' : '0s',
+          pointerEvents: fabOpen ? 'all' : 'none',
+          display:'flex',alignItems:'center',gap:12}}>
+          <button onClick={()=>{setFabOpen(false);setTab('search');setLibrarySearch('');}}
+            style={{width:48,height:48,borderRadius:'50%',border:'none',cursor:'pointer',
+              background:'#852E47',color:'#F5EDE8',flexShrink:0,
+              display:'flex',alignItems:'center',justifyContent:'center',
+              boxShadow:'0 4px 14px rgba(133,46,71,0.4)'}}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </button>
+          <span style={{background:'#852E47',color:'#F5EDE8',
+            fontSize:'0.78rem',fontWeight:700,padding:'6px 14px',borderRadius:20,
+            fontFamily:"'Nunito',sans-serif",whiteSpace:'nowrap',
+            boxShadow:'0 2px 8px rgba(133,46,71,0.3)'}}>Search Library</span>
+        </div>
+
+        {/* Add Book */}
+        <div style={{
+          transform: fabOpen ? 'translateY(0) scale(1)' : 'translateY(10px) scale(0.85)',
+          opacity: fabOpen ? 1 : 0,
+          transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
+          transitionDelay: fabOpen ? '0s' : '0s',
+          pointerEvents: fabOpen ? 'all' : 'none',
+          display:'flex',alignItems:'center',gap:12}}>
+          <button onClick={()=>{setFabOpen(false);startAdd();setTab('library');}}
+            style={{width:48,height:48,borderRadius:'50%',border:'none',cursor:'pointer',
+              background:'#C2441C',color:'#F5EDE8',flexShrink:0,
+              display:'flex',alignItems:'center',justifyContent:'center',
+              boxShadow:'0 4px 14px rgba(194,68,28,0.4)'}}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+          <span style={{background:'#C2441C',color:'#F5EDE8',
+            fontSize:'0.78rem',fontWeight:700,padding:'6px 14px',borderRadius:20,
+            fontFamily:"'Nunito',sans-serif",whiteSpace:'nowrap',
+            boxShadow:'0 2px 8px rgba(194,68,28,0.3)'}}>Add Book</span>
+        </div>
+      </div>
+
       {/* NAV */}
       <nav className="nav">
-        <button className={`nav-btn ${tab==='home'?'active':''}`} onClick={()=>setTab('home')}>
+        <button className={`nav-btn ${fabOpen?'active':''}`}
+          onClick={()=>setFabOpen(o=>!o)}
+          style={{transition:'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+            transform: fabOpen ? 'rotate(45deg)' : 'rotate(0deg)'}}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/>
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
-          Home
+          Menu
         </button>
-        <button className={`nav-btn ${tab==='library'?'active':''}`} onClick={()=>setTab('library')}>
+        <button className={`nav-btn ${tab==='library'?'active':''}`} onClick={()=>{setFabOpen(false);setTab('library');}}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
           </svg>
           Library
         </button>
-        <button className={`nav-btn ${tab==='stats'?'active':''}`} onClick={()=>setTab('stats')}>
+        <button className={`nav-btn ${tab==='home'?'active':''}`} onClick={()=>{setFabOpen(false);setTab('home');}}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/>
+          </svg>
+          Home
+        </button>
+        <button className={`nav-btn ${tab==='stats'?'active':''}`} onClick={()=>{setFabOpen(false);setTab('stats');}}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
           </svg>
           Stats
         </button>
       </nav>
-
-      {/* EXPANDABLE FAB MENU */}
-      {fabOpen && (
-        <div onClick={()=>setFabOpen(false)}
-          style={{position:'fixed',inset:0,zIndex:48,background:'rgba(13,36,77,0.3)'}}/>
-      )}
-
-      {/* FAB Menu Items */}
-      <div style={{position:'fixed',bottom:82,left:'50%',transform:'translateX(-50%)',
-        zIndex:49,display:'flex',flexDirection:'column',alignItems:'center',gap:10}}>
-
-        {/* Option 3 - Log Today */}
-        <div style={{
-          transform: fabOpen ? 'translateY(0) scale(1)' : 'translateY(60px) scale(0.8)',
-          opacity: fabOpen ? 1 : 0,
-          transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
-          transitionDelay: fabOpen ? '0.1s' : '0s',
-          pointerEvents: fabOpen ? 'all' : 'none',
-          display:'flex',alignItems:'center',gap:10}}>
-          <span style={{background:'rgba(13,36,77,0.85)',color:'#F5EDE8',
-            fontSize:'0.75rem',fontWeight:700,padding:'5px 12px',borderRadius:20,
-            fontFamily:"'Nunito',sans-serif",whiteSpace:'nowrap',
-            boxShadow:'0 2px 8px rgba(13,36,77,0.3)'}}>Log Today</span>
-          <button onClick={()=>{setFabOpen(false);setTab('log');}}
-            style={{width:46,height:46,borderRadius:'50%',border:'none',cursor:'pointer',
-              background:'#0D244D',color:'#F5EDE8',
-              display:'flex',alignItems:'center',justifyContent:'center',
-              boxShadow:'0 4px 14px rgba(13,36,77,0.4)',flexShrink:0}}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-          </button>
-        </div>
-
-        {/* Option 2 - Search Library */}
-        <div style={{
-          transform: fabOpen ? 'translateY(0) scale(1)' : 'translateY(40px) scale(0.8)',
-          opacity: fabOpen ? 1 : 0,
-          transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
-          transitionDelay: fabOpen ? '0.05s' : '0s',
-          pointerEvents: fabOpen ? 'all' : 'none',
-          display:'flex',alignItems:'center',gap:10}}>
-          <span style={{background:'rgba(13,36,77,0.85)',color:'#F5EDE8',
-            fontSize:'0.75rem',fontWeight:700,padding:'5px 12px',borderRadius:20,
-            fontFamily:"'Nunito',sans-serif",whiteSpace:'nowrap',
-            boxShadow:'0 2px 8px rgba(13,36,77,0.3)'}}>Search Library</span>
-          <button onClick={()=>{setFabOpen(false);setTab('search');setLibrarySearch('');}}
-            style={{width:46,height:46,borderRadius:'50%',border:'none',cursor:'pointer',
-              background:'#852E47',color:'#F5EDE8',
-              display:'flex',alignItems:'center',justifyContent:'center',
-              boxShadow:'0 4px 14px rgba(133,46,71,0.4)',flexShrink:0}}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-          </button>
-        </div>
-
-        {/* Option 1 - Add Book */}
-        <div style={{
-          transform: fabOpen ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.8)',
-          opacity: fabOpen ? 1 : 0,
-          transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
-          transitionDelay: fabOpen ? '0s' : '0s',
-          pointerEvents: fabOpen ? 'all' : 'none',
-          display:'flex',alignItems:'center',gap:10}}>
-          <span style={{background:'rgba(13,36,77,0.85)',color:'#F5EDE8',
-            fontSize:'0.75rem',fontWeight:700,padding:'5px 12px',borderRadius:20,
-            fontFamily:"'Nunito',sans-serif",whiteSpace:'nowrap',
-            boxShadow:'0 2px 8px rgba(13,36,77,0.3)'}}>Add Book</span>
-          <button onClick={()=>{setFabOpen(false);startAdd();setTab('library');}}
-            style={{width:46,height:46,borderRadius:'50%',border:'none',cursor:'pointer',
-              background:'#C2441C',color:'#F5EDE8',
-              display:'flex',alignItems:'center',justifyContent:'center',
-              boxShadow:'0 4px 14px rgba(194,68,28,0.4)',flexShrink:0}}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-          </button>
-        </div>
-
-        {/* Main FAB trigger */}
-        <button onClick={()=>setFabOpen(o=>!o)}
-          style={{width:52,height:52,borderRadius:'50%',border:'none',cursor:'pointer',
-            background:'linear-gradient(135deg,#0D244D,#852E47)',
-            color:'#F5EDE8',
-            display:'flex',alignItems:'center',justifyContent:'center',
-            boxShadow:'0 4px 20px rgba(13,36,77,0.5)',
-            transform: fabOpen ? 'rotate(45deg)' : 'rotate(0deg)',
-            transition:'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)'}}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-        </button>
-      </div>
 
       <div className="container">
 
