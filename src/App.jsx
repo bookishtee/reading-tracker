@@ -1168,9 +1168,7 @@ export default function App() {
       {/* NAV */}
       <nav className="nav">
         <button className={`nav-btn ${fabOpen?'active':''}`}
-          onClick={()=>setFabOpen(o=>!o)}
-          style={{transition:'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)',
-            transform: fabOpen ? 'rotate(45deg)' : 'rotate(0deg)'}}>
+          onClick={()=>setFabOpen(o=>!o)}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
