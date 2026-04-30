@@ -1200,9 +1200,7 @@ export default function App() {
         </button>
       </nav>
 
-      <div className="container">
-
-        {/* SEARCH MODAL */}
+      {/* SEARCH MODAL */}
       {searchOpen && (
         <div style={{position:'fixed',inset:0,zIndex:200,background:'var(--bg)',display:'flex',flexDirection:'column'}}>
           <div style={{background:'linear-gradient(135deg,#0D244D,#852E47)',padding:'52px 20px 16px',display:'flex',alignItems:'center',gap:12}}>
@@ -1265,7 +1263,6 @@ export default function App() {
               );
             })()}
           </div>
-        </div>
       )}
 
         {/* ── HOME ── */}
