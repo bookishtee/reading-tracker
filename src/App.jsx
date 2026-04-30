@@ -1089,7 +1089,7 @@ export default function App() {
       {/* OVERLAY */}
       {fabOpen && (
         <div onClick={()=>setFabOpen(false)}
-          style={{position:'fixed',inset:0,zIndex:46,background:'rgba(13,36,77,0.25)'}}/>
+          style={{position:'fixed',top:0,left:0,right:0,bottom:80,zIndex:44,background:'rgba(13,36,77,0.25)'}}/>
       )}
 
       {/* EXPANDED MENU ITEMS */}
@@ -1142,28 +1142,6 @@ export default function App() {
             boxShadow:'0 2px 8px rgba(13,36,77,0.3)'}}>Log Today</span>
         </div>
 
-        {/* Search */}
-        <div style={{
-          transform: fabOpen ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.85)',
-          opacity: fabOpen ? 1 : 0,
-          transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
-          transitionDelay: fabOpen ? '0.05s' : '0s',
-          pointerEvents: fabOpen ? 'all' : 'none',
-          display:'flex',alignItems:'center',flexDirection:'row-reverse',gap:12}}>
-          <button onClick={()=>{setFabOpen(false);setLibrarySearch('');setSearchOpen(true);}}
-            style={{width:48,height:48,borderRadius:'50%',border:'none',cursor:'pointer',
-              background:'#852E47',color:'#F5EDE8',flexShrink:0,
-              display:'flex',alignItems:'center',justifyContent:'center',
-              boxShadow:'0 4px 14px rgba(133,46,71,0.4)'}}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-          </button>
-          <span style={{background:'#852E47',color:'#F5EDE8',
-            fontSize:'0.78rem',fontWeight:700,padding:'6px 14px',borderRadius:20,
-            fontFamily:"'Nunito',sans-serif",whiteSpace:'nowrap',
-            boxShadow:'0 2px 8px rgba(133,46,71,0.3)'}}>Search Library</span>
-        </div>
 
         {/* Add Book */}
         <div style={{
@@ -1191,19 +1169,29 @@ export default function App() {
 
       {/* NAV */}
       <nav className="nav">
-        <button className={`nav-btn ${tab==='home' && !fabOpen?'active':''}`} onClick={()=>{setFabOpen(false);setTab('home');}}>
+        <button className={`nav-btn ${tab==='home' && !fabOpen?'active':''}`}
+          onClick={()=>{setFabOpen(false);setTab('home');}}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/>
           </svg>
           Home
         </button>
-        <button className={`nav-btn ${tab==='library' && !fabOpen?'active':''}`} onClick={()=>{setFabOpen(false);setTab('library');}}>
+        <button className={`nav-btn ${tab==='library' && !fabOpen?'active':''}`}
+          onClick={()=>{setFabOpen(false);setTab('library');}}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
           </svg>
           Library
         </button>
-        <button className={`nav-btn ${fabOpen?'active':''}`} onClick={()=>setFabOpen(o=>!o)}>
+        <button className={`nav-btn ${searchOpen?'active':''}`}
+          onClick={()=>{setFabOpen(false);setLibrarySearch('');setSearchOpen(true);}}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          Search
+        </button>
+        <button className={`nav-btn ${fabOpen?'active':''}`}
+          onClick={()=>setFabOpen(o=>!o)}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 2l1.09 3.26L16.5 4.27l-2.18 2.73L17 9.5l-3.5-.5L12 12.5l-1.5-3.5L7 9.5l2.68-2.5L7.5 4.27l3.41 1L12 2z"/>
             <path d="M5 17l.5 1.5L7 19l-1.5.5L5 21l-.5-1.5L3 19l1.5-.5L5 17z"/>
