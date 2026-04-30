@@ -255,7 +255,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
   background: var(--white); border-top: 1px solid var(--border);
   padding: 8px 12px 16px;
   position: fixed; bottom: 0; left: 0; right: 0;
-  z-index: 50;
+  z-index: 200;
   box-shadow: 0 -2px 16px rgba(13,36,77,0.08);
 }
 .nav-btn {
@@ -1093,7 +1093,7 @@ export default function App() {
       )}
 
       {/* EXPANDED MENU ITEMS */}
-      <div style={{position:'fixed',bottom:110,right:0,zIndex:51,pointerEvents:'none',
+      <div style={{position:'fixed',bottom:110,right:0,zIndex:150,pointerEvents:'none',
         display:'flex',flexDirection:'column',alignItems:'flex-end',gap:12,padding:'0 20px 0 0'}}>
 
         {/* Stats */}
