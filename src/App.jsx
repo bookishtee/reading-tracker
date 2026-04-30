@@ -1092,8 +1092,8 @@ export default function App() {
       )}
 
       {/* EXPANDED MENU ITEMS */}
-      <div style={{position:'fixed',bottom:110,left:0,zIndex:50,
-        display:'flex',flexDirection:'column',alignItems:'flex-start',gap:12,padding:'0 0 0 20px'}}>
+      <div style={{position:'fixed',bottom:110,right:0,zIndex:51,pointerEvents:'none',
+        display:'flex',flexDirection:'column',alignItems:'flex-end',gap:12,padding:'0 20px 0 0'}}>
 
         {/* Stats */}
         <div style={{
@@ -1102,7 +1102,7 @@ export default function App() {
           transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
           transitionDelay: fabOpen ? '0.15s' : '0s',
           pointerEvents: fabOpen ? 'all' : 'none',
-          display:'flex',alignItems:'center',gap:12}}>
+          display:'flex',alignItems:'center',flexDirection:'row-reverse',gap:12}}>
           <button onClick={()=>{setFabOpen(false);setTab('stats');}}
             style={{width:48,height:48,borderRadius:'50%',border:'none',cursor:'pointer',
               background:'#AA542B',color:'#F5EDE8',flexShrink:0,
@@ -1125,7 +1125,7 @@ export default function App() {
           transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
           transitionDelay: fabOpen ? '0.1s' : '0s',
           pointerEvents: fabOpen ? 'all' : 'none',
-          display:'flex',alignItems:'center',gap:12}}>
+          display:'flex',alignItems:'center',flexDirection:'row-reverse',gap:12}}>
           <button onClick={()=>{setFabOpen(false);setTab('log');}}
             style={{width:48,height:48,borderRadius:'50%',border:'none',cursor:'pointer',
               background:'#0D244D',color:'#F5EDE8',flexShrink:0,
@@ -1148,7 +1148,7 @@ export default function App() {
           transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
           transitionDelay: fabOpen ? '0.05s' : '0s',
           pointerEvents: fabOpen ? 'all' : 'none',
-          display:'flex',alignItems:'center',gap:12}}>
+          display:'flex',alignItems:'center',flexDirection:'row-reverse',gap:12}}>
           <button onClick={()=>{setFabOpen(false);setTab('search');setLibrarySearch('');}}
             style={{width:48,height:48,borderRadius:'50%',border:'none',cursor:'pointer',
               background:'#852E47',color:'#F5EDE8',flexShrink:0,
@@ -1171,7 +1171,7 @@ export default function App() {
           transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
           transitionDelay: fabOpen ? '0s' : '0s',
           pointerEvents: fabOpen ? 'all' : 'none',
-          display:'flex',alignItems:'center',gap:12}}>
+          display:'flex',alignItems:'center',flexDirection:'row-reverse',gap:12}}>
           <button onClick={()=>{setFabOpen(false);startAdd();setTab('library');}}
             style={{width:48,height:48,borderRadius:'50%',border:'none',cursor:'pointer',
               background:'#C2441C',color:'#F5EDE8',flexShrink:0,
@@ -1190,13 +1190,13 @@ export default function App() {
 
       {/* NAV */}
       <nav className="nav">
-        <button className={`nav-btn ${tab==='home'?'active':''}`} onClick={()=>{setFabOpen(false);setTab('home');}}>
+        <button className={`nav-btn ${tab==='home' && !fabOpen?'active':''}`} onClick={()=>{setFabOpen(false);setTab('home');}}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/>
           </svg>
           Home
         </button>
-        <button className={`nav-btn ${tab==='library'?'active':''}`} onClick={()=>{setFabOpen(false);setTab('library');}}>
+        <button className={`nav-btn ${tab==='library' && !fabOpen?'active':''}`} onClick={()=>{setFabOpen(false);setTab('library');}}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
           </svg>
