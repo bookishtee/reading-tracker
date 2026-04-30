@@ -1183,8 +1183,8 @@ export default function App() {
           </svg>
           Library
         </button>
-        <button className={`nav-btn ${searchOpen?'active':''}`}
-          onClick={()=>{setFabOpen(false);setLibrarySearch('');setSearchOpen(true);}}>
+        <button className={`nav-btn ${tab==='search' && !fabOpen?'active':''}`}
+          onClick={()=>{setFabOpen(false);setLibrarySearch('');setTab('search');}}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
@@ -1200,18 +1200,12 @@ export default function App() {
         </button>
       </nav>
 
-      {/* SEARCH MODAL */}
-      {searchOpen && (
-        <div style={{position:'fixed',inset:0,zIndex:200,background:'var(--bg)',display:'flex',flexDirection:'column'}}>
-          <div style={{background:'linear-gradient(135deg,#0D244D,#852E47)',padding:'52px 20px 16px',display:'flex',alignItems:'center',gap:12}}>
-            <div style={{fontFamily:"'Fraunces',serif",fontSize:'1.3rem',fontWeight:700,color:'#F5EDE8',flex:1}}>Search Library</div>
-            <button onClick={()=>{setSearchOpen(false);setLibrarySearch('');}}
-              style={{background:'rgba(255,255,255,0.15)',border:'none',borderRadius:'50%',
-                width:34,height:34,color:'#F5EDE8',fontSize:'1.1rem',cursor:'pointer',
-                display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
-          </div>
-          <div style={{padding:'16px 16px 8px',position:'relative'}}>
-            <svg style={{position:'absolute',left:28,top:'50%',transform:'translateY(-50%)',opacity:0.4}} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <div className="container">
+        {/* ── SEARCH ── */}
+        {tab==='search' && <>
+          <div className="page-title" style={{marginBottom:14}}>Search Library</div>
+          <div style={{position:'relative',marginBottom:16}}>
+            <svg style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',opacity:0.4}} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input className="form-input" style={{paddingLeft:36}}
               placeholder="Search by title or author…"
               value={librarySearch}
@@ -1219,54 +1213,51 @@ export default function App() {
             />
             {librarySearch && (
               <button onClick={()=>setLibrarySearch('')}
-                style={{position:'absolute',right:26,top:'50%',transform:'translateY(-50%)',
+                style={{position:'absolute',right:10,top:'50%',transform:'translateY(-50%)',
                   background:'none',border:'none',cursor:'pointer',color:'var(--mid)',fontSize:'1rem'}}>✕</button>
             )}
           </div>
-          <div style={{flex:1,overflowY:'auto',padding:'0 16px 100px'}}>
-            {librarySearch.trim().length < 2 ? (
+          {librarySearch.trim().length < 2 ? (
+            <div style={{textAlign:'center',padding:'40px 20px',color:'var(--mid)'}}>
+              <div style={{fontSize:'2rem',marginBottom:10}}>🔍</div>
+              <div style={{fontFamily:"'Fraunces',serif",fontSize:'1rem',fontWeight:600}}>Start typing to search</div>
+              <div style={{fontSize:'0.8rem',marginTop:6}}>Search across all {books.length} books</div>
+            </div>
+          ) : (() => {
+            const q = librarySearch.trim().toLowerCase();
+            const results = books.filter(b =>
+              b.title?.toLowerCase().includes(q) || b.author?.toLowerCase().includes(q)
+            );
+            return results.length === 0 ? (
               <div style={{textAlign:'center',padding:'40px 20px',color:'var(--mid)'}}>
-                <div style={{fontSize:'2rem',marginBottom:10}}>🔍</div>
-                <div style={{fontFamily:"'Fraunces',serif",fontSize:'1rem',fontWeight:600}}>Start typing to search</div>
-                <div style={{fontSize:'0.8rem',marginTop:6}}>Search across all {books.length} books</div>
+                <div style={{fontSize:'2rem',marginBottom:10}}>😔</div>
+                <div style={{fontFamily:"'Fraunces',serif",fontSize:'1rem',fontWeight:600}}>No results found</div>
               </div>
-            ) : (() => {
-              const q = librarySearch.trim().toLowerCase();
-              const results = books.filter(b =>
-                b.title?.toLowerCase().includes(q) || b.author?.toLowerCase().includes(q)
-              );
-              return results.length === 0 ? (
-                <div style={{textAlign:'center',padding:'40px 20px',color:'var(--mid)'}}>
-                  <div style={{fontSize:'2rem',marginBottom:10}}>😔</div>
-                  <div style={{fontFamily:"'Fraunces',serif",fontSize:'1rem',fontWeight:600}}>No results found</div>
-                </div>
-              ) : (
-                <>
-                  <div className="page-count" style={{marginBottom:12}}>{results.length} result{results.length!==1?'s':''}</div>
-                  {results.map(b=>(
-                    <div key={b.id} className="book-item" style={{cursor:'pointer'}} onClick={()=>{setDetailBook(b);setSearchOpen(false);}}>
-                      {b.cover_url
-                        ? <img src={b.cover_url} alt={b.title} className="book-cover" onError={e=>e.target.style.display='none'} />
-                        : <div className="book-cover-ph">📖</div>}
-                      <div className="book-info">
-                        <div className="book-title">{b.title}</div>
-                        {b.author && <div className="book-author">by {b.author}</div>}
-                        <div className="book-meta">
-                          <span className={`tag ${stTag(b.status)}`}>{b.status}</span>
-                          {b.format && <span className="tag t-format">{b.format}</span>}
-                        </div>
-                        {b.end_date && <div className="book-date">Finished {b.end_date}</div>}
+            ) : (
+              <>
+                <div className="page-count" style={{marginBottom:12}}>{results.length} result{results.length!==1?'s':''}</div>
+                {results.map(b=>(
+                  <div key={b.id} className="book-item" style={{cursor:'pointer'}} onClick={()=>setDetailBook(b)}>
+                    {b.cover_url
+                      ? <img src={b.cover_url} alt={b.title} className="book-cover" onError={e=>e.target.style.display='none'} />
+                      : <div className="book-cover-ph">📖</div>}
+                    <div className="book-info">
+                      <div className="book-title">{b.title}</div>
+                      {b.author && <div className="book-author">by {b.author}</div>}
+                      <div className="book-meta">
+                        <span className={`tag ${stTag(b.status)}`}>{b.status}</span>
+                        {b.format && <span className="tag t-format">{b.format}</span>}
                       </div>
+                      {b.end_date && <div className="book-date">Finished {b.end_date}</div>}
                     </div>
-                  ))}
-                </>
-              );
-            })()}
-          </div>
-        </div>
-      )}
+                  </div>
+                ))}
+              </>
+            );
+          })()}
+        </>}
 
-      <div className="container">
+
 
         {/* ── HOME ── */}
         {tab==='home' && <>
