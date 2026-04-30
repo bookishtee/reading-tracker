@@ -1092,8 +1092,8 @@ export default function App() {
       )}
 
       {/* EXPANDED MENU ITEMS — anchored above Home button */}
-      <div style={{position:'fixed',bottom:72,left:0,zIndex:49,
-        display:'flex',flexDirection:'column',alignItems:'flex-start',gap:10,padding:'0 0 0 20px'}}>
+      <div style={{position:'fixed',bottom:110,left:0,zIndex:49,
+        display:'flex',flexDirection:'column',alignItems:'flex-start',gap:12,padding:'0 0 0 20px'}}>
 
         {/* Log Today */}
         <div style={{
@@ -1167,12 +1167,11 @@ export default function App() {
 
       {/* NAV */}
       <nav className="nav">
-        <button className={`nav-btn ${fabOpen?'active':''}`}
-          onClick={()=>setFabOpen(o=>!o)}>
+        <button className={`nav-btn ${tab==='home'?'active':''}`} onClick={()=>{setFabOpen(false);setTab('home');}}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/>
           </svg>
-          Menu
+          Home
         </button>
         <button className={`nav-btn ${tab==='library'?'active':''}`} onClick={()=>{setFabOpen(false);setTab('library');}}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -1180,11 +1179,13 @@ export default function App() {
           </svg>
           Library
         </button>
-        <button className={`nav-btn ${tab==='home'?'active':''}`} onClick={()=>{setFabOpen(false);setTab('home');}}>
+        <button className={`nav-btn ${fabOpen?'active':''}`} onClick={()=>setFabOpen(o=>!o)}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/>
+            <path d="M12 2l1.09 3.26L16.5 4.27l-2.18 2.73L17 9.5l-3.5-.5L12 12.5l-1.5-3.5L7 9.5l2.68-2.5L7.5 4.27l3.41 1L12 2z"/>
+            <path d="M5 17l.5 1.5L7 19l-1.5.5L5 21l-.5-1.5L3 19l1.5-.5L5 17z"/>
+            <path d="M19 13l.4 1.2 1.2.4-1.2.4-.4 1.2-.4-1.2-1.2-.4 1.2-.4L19 13z"/>
           </svg>
-          Home
+          Menu
         </button>
         <button className={`nav-btn ${tab==='stats'?'active':''}`} onClick={()=>{setFabOpen(false);setTab('stats');}}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
