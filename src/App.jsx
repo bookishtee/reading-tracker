@@ -276,7 +276,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 .nav-btn.active::after { display: none; }
 
 /* CONTAINER */
-.container { max-width: 640px; margin: 0 auto; padding: 12px 16px 100px; }
+.container { max-width: 640px; margin: 0 auto; padding: 12px 16px 140px; }
 
 /* CARDS */
 .card {
@@ -1415,7 +1415,7 @@ export default function App() {
           )}
 
           {mode==='form' && (
-            <div className="card" style={{marginBottom:16}}>
+            <div className="card" style={{marginBottom:40}}>
               {(form.cover_url||form.title) && (
                 <div className="form-cover-header">
                   {form.cover_url
