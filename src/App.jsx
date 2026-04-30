@@ -513,7 +513,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 .modal-overlay { position: fixed; inset: 0; background: rgba(28,43,26,0.45); display: flex; align-items: flex-end; z-index: 100; }
 .modal {
   background: var(--white); border-radius: 24px 24px 0 0;
-  padding: 12px 22px 44px; width: 100%; max-height: 88vh; overflow-y: auto;
+  padding: 12px 22px 100px; width: 100%; max-height: 88vh; overflow-y: auto;
   box-shadow: 0 -6px 40px rgba(28,43,26,0.14);
 }
 .modal-handle { width: 38px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 18px; }
