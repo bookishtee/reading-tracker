@@ -1088,7 +1088,7 @@ export default function App() {
       {/* OVERLAY */}
       {fabOpen && (
         <div onClick={()=>setFabOpen(false)}
-          style={{position:'fixed',inset:0,zIndex:46,background:'rgba(13,36,77,0.25)',backdropFilter:'blur(2px)'}}/>
+          style={{position:'fixed',inset:0,zIndex:46,background:'rgba(13,36,77,0.25)'}}/>
       )}
 
       {/* EXPANDED MENU ITEMS */}
@@ -1149,7 +1149,7 @@ export default function App() {
           transitionDelay: fabOpen ? '0.05s' : '0s',
           pointerEvents: fabOpen ? 'all' : 'none',
           display:'flex',alignItems:'center',flexDirection:'row-reverse',gap:12}}>
-          <button onClick={()=>{setFabOpen(false);setTab('search');setLibrarySearch('');}}
+          <button onClick={()=>{setFabOpen(false);setTimeout(()=>{setTab('search');setLibrarySearch('');},50);}}
             style={{width:48,height:48,borderRadius:'50%',border:'none',cursor:'pointer',
               background:'#852E47',color:'#F5EDE8',flexShrink:0,
               display:'flex',alignItems:'center',justifyContent:'center',
