@@ -1263,7 +1263,10 @@ export default function App() {
               );
             })()}
           </div>
+        </div>
       )}
+
+      <div className="container">
 
         {/* ── HOME ── */}
         {tab==='home' && <>
@@ -1608,7 +1611,6 @@ export default function App() {
         </>}
 
       </div>
-    </div>
 
     {/* BOOK DETAIL SHEET */}
     <BookDetailSheet book={detailBook} onClose={()=>setDetailBook(null)} onEdit={editBook} />
@@ -1655,6 +1657,7 @@ export default function App() {
     )}
 
     <div className={`toast ${toast?'show':''}`}>{toast}</div>
+    </div>
     </>
   );
 }
