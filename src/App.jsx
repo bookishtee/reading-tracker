@@ -276,7 +276,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 .nav-btn.active::after { display: none; }
 
 /* CONTAINER */
-.container { max-width: 640px; margin: 0 auto; padding: 12px 16px 140px; }
+.container { max-width: 640px; margin: 0 auto; padding: 12px 16px 180px; }
 
 /* CARDS */
 .card {
@@ -1415,7 +1415,7 @@ export default function App() {
           )}
 
           {mode==='form' && (
-            <div className="card" style={{marginBottom:40}}>
+            <div className="card" style={{marginBottom:120}}>
               {(form.cover_url||form.title) && (
                 <div className="form-cover-header">
                   {form.cover_url
@@ -1473,8 +1473,8 @@ export default function App() {
                     ))}
                   </div>
                 </div>
-                <div className="form-group"><div className="form-label">Start Date</div><input className="form-input" type="date" value={form.start_date} onChange={e=>setForm(f=>({...f,start_date:e.target.value}))} /></div>
-                <div className="form-group"><div className="form-label">End Date</div><input className="form-input" type="date" value={form.end_date} onChange={e=>setForm(f=>({...f,end_date:e.target.value}))} /></div>
+                <div className="form-group full"><div className="form-label">Start Date</div><input className="form-input" type="date" value={form.start_date} onChange={e=>setForm(f=>({...f,start_date:e.target.value}))} /></div>
+                <div className="form-group full"><div className="form-label">End Date</div><input className="form-input" type="date" value={form.end_date} onChange={e=>setForm(f=>({...f,end_date:e.target.value}))} /></div>
                 <div className="form-group"><div className="form-label">Pages</div><input className="form-input" type="number" value={form.total_pages} onChange={e=>setForm(f=>({...f,total_pages:e.target.value}))} placeholder="e.g. 320" /></div>
                 <div className="form-group"><div className="form-label">Rating</div><StarRating value={form.rating} onChange={v=>setForm(f=>({...f,rating:v}))} /></div>
                 <div className="form-group full"><div className="form-label">Notes</div><textarea className="form-textarea" value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} placeholder="Your thoughts…" /></div>
@@ -1484,6 +1484,7 @@ export default function App() {
                 {!editId && <button className="btn-secondary" onClick={()=>setMode('search')}>← Search</button>}
                 <button className="btn-secondary" onClick={()=>{setMode('list');setEditId(null);setForm(emptyForm);}}>Cancel</button>
               </div>
+              <div style={{height:40}}/>
             </div>
           )}
 
