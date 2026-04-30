@@ -1088,12 +1088,35 @@ export default function App() {
       {/* OVERLAY */}
       {fabOpen && (
         <div onClick={()=>setFabOpen(false)}
-          style={{position:'fixed',inset:0,zIndex:48,background:'rgba(13,36,77,0.25)',backdropFilter:'blur(2px)'}}/>
+          style={{position:'fixed',inset:0,zIndex:46,background:'rgba(13,36,77,0.25)',backdropFilter:'blur(2px)'}}/>
       )}
 
-      {/* EXPANDED MENU ITEMS — anchored above Home button */}
-      <div style={{position:'fixed',bottom:110,left:0,zIndex:49,
+      {/* EXPANDED MENU ITEMS */}
+      <div style={{position:'fixed',bottom:110,left:0,zIndex:50,
         display:'flex',flexDirection:'column',alignItems:'flex-start',gap:12,padding:'0 0 0 20px'}}>
+
+        {/* Stats */}
+        <div style={{
+          transform: fabOpen ? 'translateY(0) scale(1)' : 'translateY(40px) scale(0.85)',
+          opacity: fabOpen ? 1 : 0,
+          transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
+          transitionDelay: fabOpen ? '0.15s' : '0s',
+          pointerEvents: fabOpen ? 'all' : 'none',
+          display:'flex',alignItems:'center',gap:12}}>
+          <button onClick={()=>{setFabOpen(false);setTab('stats');}}
+            style={{width:48,height:48,borderRadius:'50%',border:'none',cursor:'pointer',
+              background:'#AA542B',color:'#F5EDE8',flexShrink:0,
+              display:'flex',alignItems:'center',justifyContent:'center',
+              boxShadow:'0 4px 14px rgba(170,84,43,0.4)'}}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </button>
+          <span style={{background:'#AA542B',color:'#F5EDE8',
+            fontSize:'0.78rem',fontWeight:700,padding:'6px 14px',borderRadius:20,
+            fontFamily:"'Nunito',sans-serif",whiteSpace:'nowrap',
+            boxShadow:'0 2px 8px rgba(170,84,43,0.3)'}}>Stats</span>
+        </div>
 
         {/* Log Today */}
         <div style={{
@@ -1185,13 +1208,6 @@ export default function App() {
             <path d="M5 17l.5 1.5L7 19l-1.5.5L5 21l-.5-1.5L3 19l1.5-.5L5 17z"/>
             <path d="M19 13l.4 1.2 1.2.4-1.2.4-.4 1.2-.4-1.2-1.2-.4 1.2-.4L19 13z"/>
           </svg>
-          Menu
-        </button>
-        <button className={`nav-btn ${tab==='stats'?'active':''}`} onClick={()=>{setFabOpen(false);setTab('stats');}}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-          </svg>
-          Stats
         </button>
       </nav>
 
