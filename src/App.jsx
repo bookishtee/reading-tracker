@@ -336,7 +336,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
 .btn-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
 
 /* FORMS */
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; overflow: hidden; }
 .form-group { display: flex; flex-direction: column; gap: 5px; }
 .form-group.full { grid-column: 1 / -1; }
 .form-label { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); }
@@ -344,7 +344,12 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--in
   background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px;
   padding: 11px 14px; font-family: 'Nunito', sans-serif; font-size: 0.9rem;
   font-weight: 500; color: var(--ink); outline: none;
-  transition: border-color 0.2s, background 0.2s; width: 100%;
+  transition: border-color 0.2s, background 0.2s;
+  width: 100%; max-width: 100%; box-sizing: border-box;
+}
+input[type="date"].form-input {
+  width: 100%; max-width: 100%; box-sizing: border-box;
+  -webkit-appearance: none; appearance: none;
 }
 .form-input:focus, .form-select:focus, .form-textarea:focus {
   border-color: var(--sage-dark); background: var(--white);
