@@ -444,7 +444,7 @@ input[type="date"].form-input {
 .tag.t-format { background: var(--ink); color: var(--white); }
 .tag.t-reading { background: #EAF0F5; color: #0D244D; }
 .tag.t-done { background: #F5EDE8; color: #852E47; }
-.tag.t-want { background: #F5EAE8; color: #C2441C; }
+.tag.t-dnf { background: #F5EDE8; color: #888; }
 .book-stars { display: flex; gap: 1px; }
 .book-star { font-size: 0.82rem; color: var(--border); }
 .book-star.lit { color: var(--accent); }
@@ -594,7 +594,7 @@ input[type="date"].form-input {
 `;
 
 const FORMATS = ["📖 Physical","📱 Digital","🎧 Audiobook"];
-const STATUSES = ["Want to Read","Reading","Finished"];
+const STATUSES = ["Want to Read","Reading","Finished","Did Not Finish"];
 const GENRES = ["Fiction","Non-Fiction","Literary Fiction","Romance","Mystery","Sci-Fi","Fantasy","Biography","History","Poetry","Other"];
 const today = new Date();
 function toLocalDateStr(d) {
@@ -736,7 +736,7 @@ function BookDetailSheet({ book, onClose, onEdit }) {
             <div className="detail-meta-row">
               {book.format && <span className="tag t-format">{book.format}</span>}
               {book.genre && <span className="tag">{book.genre}</span>}
-              {book.status && <span className={`tag ${book.status==='Reading'?'t-reading':book.status==='Finished'?'t-done':'t-want'}`}>{book.status}</span>}
+              {book.status && <span className={`tag ${book.status==='Reading'?'t-reading':book.status==='Finished'?'t-done':book.status==='Did Not Finish'?'t-dnf':'t-want'}`}>{book.status}</span>}
             </div>
             {book.rating>0 && (
               <div className="detail-stars" style={{marginTop:8}}>
@@ -1028,7 +1028,7 @@ export default function App() {
   const currentlyReading = books
     .filter(b=>b.status==='Reading')
     .sort((a,b)=> new Date(b.created_at||0) - new Date(a.created_at||0));
-  function stTag(s){if(s==='Reading')return 't-reading';if(s==='Finished')return 't-done';return 't-want';}
+  function stTag(s){if(s==='Reading')return 't-reading';if(s==='Finished')return 't-done';if(s==='Did Not Finish')return 't-dnf';return 't-want';}
 
   // Reading streak — counts back from yesterday so today's log is optional
   const readingStreak = (() => {
@@ -1385,6 +1385,7 @@ export default function App() {
                 <option value="All">All Statuses</option>
                 <option value="Reading">Reading</option>
                 <option value="Finished">Finished</option>
+                <option value="Did Not Finish">Did Not Finish</option>
                 <option value="Want to Read">Want to Read</option>
               </select>
               <select value={filterYear} onChange={e=>setFilterYear(e.target.value)}
@@ -1624,28 +1625,31 @@ export default function App() {
             <span style={{fontSize:'1.1rem'}}>✕</span>
             <div><div className="log-option-text">No reading today</div></div>
           </div>
-          {currentlyReading.length === 0 && (
-            <div style={{textAlign:'center',padding:'16px 0',color:'var(--mid)',fontSize:'0.85rem',fontStyle:'italic'}}>
-              No books in progress — mark a book as "Reading" in your Library first.
-            </div>
-          )}
-          {currentlyReading.map(b=>{
-            const selected = logBook.includes(b.id);
-            return (
-              <div key={b.id} className={`log-option ${selected?'selected':''}`}
-                onClick={()=>setLogBook(prev => selected ? prev.filter(id=>id!==b.id) : [...prev, b.id])}>
-                {b.cover_url
-                  ? <img src={b.cover_url} alt={b.title} className="log-option-cover" onError={e=>e.target.style.display='none'} />
-                  : <span style={{fontSize:'1.1rem'}}>📖</span>}
-                <div style={{flex:1}}>
-                  <div className="log-option-text">{b.title}</div>
-                  {b.author && <div className="log-option-sub">by {b.author}</div>}
-                  {b.format && <div className="log-option-sub">{b.format}</div>}
-                </div>
-                {selected && <span style={{fontSize:'1.1rem',marginLeft:'auto'}}>✓</span>}
+          {(() => {
+            const booksToShow = currentlyReading;
+            if (booksToShow.length === 0) return (
+              <div style={{textAlign:'center',padding:'16px 0',color:'var(--mid)',fontSize:'0.85rem',fontStyle:'italic'}}>
+                No books in progress — mark a book as "Reading" in your Library first.
               </div>
             );
-          })}
+            return booksToShow.map(b => {
+              const selected = logBook.includes(b.id);
+              return (
+                <div key={b.id} className={`log-option ${selected?'selected':''}`}
+                  onClick={()=>setLogBook(prev => selected ? prev.filter(id=>id!==b.id) : [...prev, b.id])}>
+                  {b.cover_url
+                    ? <img src={b.cover_url} alt={b.title} className="log-option-cover" onError={e=>e.target.style.display='none'} />
+                    : <span style={{fontSize:'1.1rem'}}>📖</span>}
+                  <div style={{flex:1}}>
+                    <div className="log-option-text">{b.title}</div>
+                    {b.author && <div className="log-option-sub">by {b.author}</div>}
+                    {b.format && <div className="log-option-sub">{b.format}</div>}
+                  </div>
+                  {selected && <span style={{fontSize:'1.1rem',marginLeft:'auto'}}>✓</span>}
+                </div>
+              );
+            });
+          })()}
           <div className="btn-row" style={{marginTop:18}}>
             <button className="btn-primary" onClick={saveLog} disabled={saving}>{saving?'Saving…':'Save'}</button>
             <button className="btn-secondary" onClick={()=>setLogModal(null)}>Cancel</button>
